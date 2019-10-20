@@ -17,13 +17,16 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # ..........................................
 add_executable(gleam Renderer/Main.cpp)
 
-find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
+#find_package(OpenGL REQUIRED)
+find_package(glad CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
+
 
 # Set executable dependency libraries
 # Equivalent to pass flags -lGL, -lGLU and -lglut 
-#target_link_libraries(gleam GL)
-target_link_libraries(gleam PRIVATE GLUT::GLUT)
+#target_link_libraries(gleam PRIVATE GL)
+target_link_libraries(gleam PRIVATE glad::glad)
+target_link_libraries(gleam PRIVATE glfw)
 
 # Add target to run executable 
 add_custom_target(run

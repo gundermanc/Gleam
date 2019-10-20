@@ -21,7 +21,11 @@ jobs:
     vmImage: 'macOS-latest'
 
   steps:
-    - pwsh: .\Init.ps1
+    - task: ShellScript@2
+      inputs:
+        scriptPath: ./init.sh
       displayName: Initialize environment
-    - pwsh: .\Build.ps1
+    - task: ShellScript@2
+      inputs:
+        scriptPath: ./build.sh
       displayName: Build
