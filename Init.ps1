@@ -12,4 +12,6 @@ Push-Location .\vcpkg
 # Install required vcpkgs.
 .\vcpkg.exe install glad --triplet x86-windows
 .\vcpkg.exe install glad --triplet x64-windows
+.\vcpkg.exe install glfw3 --triplet x64-windows
+.\vcpkg.exe install glfw3 --triplet x64-windows
 Pop-Location
