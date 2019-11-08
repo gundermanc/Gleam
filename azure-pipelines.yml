@@ -10,4 +10,13 @@ jobs:
 
   steps:
 
-    - powershell: .\Build.ps1
+    - pwsh: .\Build.ps1
+
+- job: Mac
+  displayName: Build for OS X
+  timeoutInMinutes: 10
+  pool:
+    vmImage: 'macOS-latest'
+
+  steps:
+    - pwsh: .\Build.ps1
