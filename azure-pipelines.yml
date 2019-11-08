@@ -10,7 +10,9 @@ jobs:
 
   steps:
     - pwsh: .\Init.ps1
+      displayName: Initialize environment
     - pwsh: .\Build.ps1
+      displayName: Build
 
 - job: Mac
   displayName: Build for OS X
@@ -20,4 +22,6 @@ jobs:
 
   steps:
     - pwsh: .\Init.ps1
+      displayName: Initialize environment
     - pwsh: .\Build.ps1
+      displayName: Build
