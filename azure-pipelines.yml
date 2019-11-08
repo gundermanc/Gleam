@@ -1,0 +1,13 @@
+trigger:
+- master
+
+jobs:
+- job: Windows
+  displayName: Build for Windows
+  timeoutInMinutes: 10
+  pool:
+    vmImage: 'windows-latest'
+
+  steps:
+
+    - task: CMake@1
