@@ -10,4 +10,4 @@ jobs:
 
   steps:
 
-    - task: CMake@1
+    - powershell: .\Build.ps1
