@@ -11,7 +11,7 @@
 brew install python
 
 # Install GCC6, which is needed for vcpkg.
-#brew install gcc6
+brew install gcc6
 
 # # Initialize vcpkg.
 git submodule init
