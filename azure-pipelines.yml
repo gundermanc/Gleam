@@ -9,8 +9,8 @@ jobs:
     vmImage: 'windows-latest'
 
   steps:
-
-    - pwsh: .\Init.ps1;.\Build.ps1
+    - pwsh: .\Init.ps1
+    - pwsh: .\Build.ps1
 
 - job: Mac
   displayName: Build for OS X
@@ -19,4 +19,5 @@ jobs:
     vmImage: 'macOS-latest'
 
   steps:
-    - pwsh: .\Init.ps1;.\Build.ps1
+    - pwsh: .\Init.ps1
+    - pwsh: .\Build.ps1
