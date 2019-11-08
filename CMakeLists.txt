@@ -1,5 +1,4 @@
 # Untitled 'Christian-Gunderman' project
-# Initially inspired by: https://gist.github.com/caiorss/fd9e61887e9b2575f2275a80af44fac2
 
 cmake_minimum_required(VERSION 3.9)
 
