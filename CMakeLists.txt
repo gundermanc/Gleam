@@ -14,16 +14,14 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # Build an executable (Unix-like OSes generates ./openglDemo1, on
 # Windows ./opengDemo1.exe)
 # ..........................................
-add_executable(gleam Renderer/Main.cpp)
+add_executable(gleam WIN32 MACOSX_BUNDLE Renderer/Main.cpp)
 
-#find_package(OpenGL REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 
 
 # Set executable dependency libraries
 # Equivalent to pass flags -lGL, -lGLU and -lglut 
-#target_link_libraries(gleam PRIVATE GL)
 target_link_libraries(gleam PRIVATE glad::glad)
 target_link_libraries(gleam PRIVATE glfw)
 

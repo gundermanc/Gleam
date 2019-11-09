@@ -3,15 +3,16 @@
 
 # Important: must keep in sync with init.sh
 
-# Install XQuartz, which is needed for now for freeglut.
-# brew install Caskroom/cask/xquartz
-# brew install cmake
-
 # Install python, required for glad
 brew install python
 
+# Pick a known compatible XCode build.
+if [ $IsCIBuild ]
+then
+    sudo xcode-select --switch /Applications/XCode_9.4.1.app
+fi
+
 # Install GCC6, which is needed for vcpkg.
-sudo xcode-select --switch /Applications/XCode_9.4.1.app
 brew install gcc6
 
 # # Initialize vcpkg.

@@ -1,6 +1,9 @@
 trigger:
 - master
 
+variables:
+  IsCIBuild: true
+
 jobs:
 - job: Windows
   displayName: Build for Windows
