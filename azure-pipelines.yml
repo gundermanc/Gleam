@@ -1,6 +1,9 @@
 trigger:
 - master
 
+variables:
+  CMAKE_BUILD_TYPE: Release
+
 jobs:
 - job: Windows
   displayName: Build for Windows
@@ -9,8 +12,10 @@ jobs:
     vmImage: 'windows-latest'
 
   steps:
-
+    - pwsh: .\Init.ps1
+      displayName: Initialize environment
     - pwsh: .\Build.ps1
+      displayName: Build
 
 - job: Mac
   displayName: Build for OS X
@@ -19,4 +24,13 @@ jobs:
     vmImage: 'macOS-latest'
 
   steps:
-    - pwsh: .\Build.ps1
+    - pwsh: sudo xcode-select --switch /Applications/XCode_9.4.1.app
+      displayName: Select XCode version
+    - task: ShellScript@2
+      inputs:
+        scriptPath: ./init.sh
+      displayName: Initialize environment
+    - task: ShellScript@2
+      inputs:
+        scriptPath: ./build.sh
+      displayName: Build
