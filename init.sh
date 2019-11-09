@@ -6,12 +6,6 @@
 # Install python, required for glad
 brew install python
 
-# Pick a known compatible XCode build.
-if [ $IsCIBuild ]
-then
-    sudo xcode-select --switch /Applications/XCode_9.4.1.app
-fi
-
 # Install GCC6, which is needed for vcpkg.
 brew install gcc6
 
