@@ -14,20 +14,18 @@ jobs:
     - pwsh: .\Build.ps1
       displayName: Build
 
-# Azure Pipelines currently uses too old of a version of OS X for VCPKG.
-# using Travis CI for now.
-# - job: Mac
-#   displayName: Build for OS X
-#   timeoutInMinutes: 10
-#   pool:
-#     vmImage: 'macOS-latest'
+- job: Mac
+  displayName: Build for OS X
+  timeoutInMinutes: 10
+  pool:
+    vmImage: 'macOS-latest'
 
-#   steps:
-#     - task: ShellScript@2
-#       inputs:
-#         scriptPath: ./init.sh
-#       displayName: Initialize environment
-#     - task: ShellScript@2
-#       inputs:
-#         scriptPath: ./build.sh
-#       displayName: Build
+  steps:
+    - task: ShellScript@2
+      inputs:
+        scriptPath: ./init.sh
+      displayName: Initialize environment
+    - task: ShellScript@2
+      inputs:
+        scriptPath: ./build.sh
+      displayName: Build

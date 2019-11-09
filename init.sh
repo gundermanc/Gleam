@@ -17,7 +17,7 @@ brew install gcc6
 git submodule init
 git submodule update
 pushd ./vcpkg
-./bootstrap-vcpkg.sh
+./bootstrap-vcpkg.sh --allowAppleClang
 
 # # Install required vcpkgs.
 # TODO: support linux.
