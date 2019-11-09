@@ -24,9 +24,7 @@ jobs:
     vmImage: 'macOS-latest'
 
   steps:
-    - task: ShellScript@2
-      inputs:
-        inline: sudo xcode-select --switch /Applications/XCode_9.4.1.app
+    - pwsh: sudo xcode-select --switch /Applications/XCode_9.4.1.app
       displayName: Select XCode version
     - task: ShellScript@2
       inputs:
