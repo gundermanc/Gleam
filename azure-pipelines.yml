@@ -2,7 +2,7 @@ trigger:
 - master
 
 variables:
-  IsCIBuild: true
+  CMAKE_BUILD_TYPE: Release
 
 jobs:
 - job: Windows

@@ -19,7 +19,6 @@ add_executable(gleam WIN32 MACOSX_BUNDLE Renderer/Main.cpp)
 find_package(glad CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 
-
 # Set executable dependency libraries
 # Equivalent to pass flags -lGL, -lGLU and -lglut 
 target_link_libraries(gleam PRIVATE glad::glad)
@@ -31,3 +30,10 @@ add_custom_target(run
     DEPENDS gleam 
     WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
 )
+
+#============= Platform Specific ==============#
+if (MSVC)
+    # Tell MSVC to use main instead of WinMain for Windows subsystem executables
+    set_target_properties(gleam PROPERTIES
+                          LINK_FLAGS "/ENTRY:mainCRTStartup")
+endif()
