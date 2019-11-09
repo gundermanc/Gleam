@@ -11,13 +11,14 @@
 brew install python
 
 # Install GCC6, which is needed for vcpkg.
+sudo xcode-select --switch /Applications/XCode_9.4.1.app
 brew install gcc6
 
 # # Initialize vcpkg.
 git submodule init
 git submodule update
 pushd ./vcpkg
-./bootstrap-vcpkg.sh --allowAppleClang
+./bootstrap-vcpkg.sh
 
 # # Install required vcpkgs.
 # TODO: support linux.
