@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "x86-Debug",
+            "configurationType": "Debug",
+            "cmakeCommandArgs": "-DCMAKE_TOOLCHAIN_FILE=\".\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake\"",
+            "buildRoot": "${workspaceRoot}\\out\\x86"
+        },
+        {
+            "name": "x64-Debug",
+            "configurationType": "Debug",
+            "cmakeCommandArgs": "-DCMAKE_TOOLCHAIN_FILE=\".\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake\"",
+            "buildRoot": "${workspaceRoot}\\out\\x64"
+        }
+    ]
+}

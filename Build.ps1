@@ -4,6 +4,8 @@
 # Build renderer.
 Remove-Item -Recurse .\out -ErrorAction SilentlyContinue
 
+$env:VCPKG_ROOT=(Resolve-Path ".\vcpkg")
+
 cmake -DCMAKE_TOOLCHAIN_FILE=".\vcpkg\scripts\buildsystems\vcpkg.cmake" -G "Visual Studio 16 2019" -A Win32 -S . -B out\x86
 cmake --build out\x86
 
