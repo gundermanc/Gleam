@@ -22,8 +22,7 @@ endif()
 # Windows ./gleam.exe)
 # ..........................................
 add_executable(
-    gleam WIN32
-    # MACOSX_BUNDLE TODO: disable MacOSX bundle for now so we can find our content without platform specific code.
+    gleam WIN32 MACOSX_BUNDLE
     Renderer/Main.cpp
     Renderer/Text/mat4.c
     Renderer/Text/shader.c)
