@@ -3,6 +3,11 @@
  * Distributed under the OSI-approved BSD 2-Clause License.  See accompanying
  * file `LICENSE` for more details.
  */
+
+// TODO: I think there might not be newer equivalents of these
+// on Windows.
+#define GL_SILENCE_DEPRECATION
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

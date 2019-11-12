@@ -6,7 +6,8 @@
 #ifndef __SHADER_H__
 #define __SHADER_H__
 
-#include <GL/gl.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 #ifdef __cplusplus
 extern "C" {

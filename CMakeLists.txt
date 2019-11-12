@@ -9,9 +9,9 @@ project(Gleam)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-# Set the default build type to Debug if none is specified.
+# Set the default build type to debug if none is specified.
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
+    set(CMAKE_BUILD_TYPE "debug" CACHE STRING "Choose the type of build." FORCE)
     # Set the possible values of build type for cmake-gui
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 endif()
@@ -22,7 +22,8 @@ endif()
 # Windows ./gleam.exe)
 # ..........................................
 add_executable(
-    gleam WIN32 MACOSX_BUNDLE
+    gleam WIN32
+    # MACOSX_BUNDLE TODO: disable MacOSX bundle for now so we can find our content without platform specific code.
     Renderer/Main.cpp
     Renderer/Text/mat4.c
     Renderer/Text/shader.c)
@@ -39,7 +40,11 @@ target_link_libraries(gleam PRIVATE glfw)
 target_link_libraries(gleam PRIVATE Freetype::Freetype)
 
 # Freetype-GL package doesn't seem to have right configuration for install to work.
-target_link_libraries(gleam PRIVATE "$ENV{VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/${CMAKE_BUILD_TYPE}/lib/freetype-gl.lib")
+if (MSVC)
+    target_link_libraries(gleam PRIVATE "$ENV{VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/${CMAKE_BUILD_TYPE}/lib/freetype-gl.lib")
+else()
+    target_link_libraries(gleam PRIVATE "$ENV{VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/${CMAKE_BUILD_TYPE}/lib/libfreetype-gl.a")
+endif (MSVC)
 
 add_custom_command(TARGET gleam POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
