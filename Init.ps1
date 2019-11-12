@@ -14,4 +14,6 @@ Push-Location .\vcpkg
 .\vcpkg.exe install glad --triplet x64-windows
 .\vcpkg.exe install glfw3 --triplet x86-windows
 .\vcpkg.exe install glfw3 --triplet x64-windows
+.\vcpkg.exe install freetype-gl --triplet x86-windows
+.\vcpkg.exe install freetype-gl --triplet x64-windows
 Pop-Location

@@ -19,4 +19,5 @@ pushd ./vcpkg
 # TODO: support linux.
 ./vcpkg install glad --triplet x64-osx
 ./vcpkg install glfw3 --triplet x64-osx
+./vcpkg.exe install freetype-gl --triplet x64-osx
 popd
