@@ -51,11 +51,12 @@ void add_text(vertex_buffer_t* buffer, texture_font_t* font,
             {
                 kerning = texture_glyph_get_kerning(glyph, text + i - 1);
             }
+
             pen->x += kerning;
             float x0 = (int)(pen->x + glyph->offset_x);
-            float y0 = (int)(pen->y + glyph->offset_y);
+            float y0 = (int)(pen->y - glyph->offset_y);
             float x1 = (int)(x0 + glyph->width);
-            float y1 = (int)(y0 - glyph->height);
+            float y1 = (int)(y0 + glyph->height);
             float s0 = glyph->s0;
             float t0 = glyph->t0;
             float s1 = glyph->s1;
@@ -73,17 +74,18 @@ void add_text(vertex_buffer_t* buffer, texture_font_t* font,
 
 void key( GLFWwindow* window, int k, int s, int action, int mods )
 {
+
 }
 
 void reshape( GLFWwindow* window, int width, int height )
 {
     glViewport(0, 0, width, height);
-    mat4_set_orthographic(&projection, 0, width, 0, height, -1, 1);
+    mat4_set_orthographic(&projection, 0, width, height, 0, 1, -1);
 }
 
 void draw()
 {
-  glClearColor(1, 1, 1, 1);
+    glClearColor(0.5, 05, 0.5, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_BLEND);
@@ -117,13 +119,14 @@ static void init(void)
     const char* filename = "Content/Cascadia-Code/Cascadia.ttf";
     char* text = "Hello world";
     buffer = vertex_buffer_new("vertex:3f,tex_coord:2f,color:4f");
-    vec2 pen = { {5,400} };
+    vec2 pen = { {0,70} };
     vec4 black = { {0,0,0,1} };
-    for (i = 7; i < 27; ++i)
+    //for (i = 7; i < 27; ++i)
     {
-        font = texture_font_new_from_file(atlas, i, filename);
+        font = texture_font_new_from_file(atlas, 27, filename);
         pen.x = 5;
         pen.y -= font->height;
+        black.a *= .9;
         texture_font_load_glyphs(font, text);
         add_text(buffer, font, text, &black, &pen);
         texture_font_delete(font);
@@ -131,8 +134,8 @@ static void init(void)
 
     glGenTextures(1, &atlas->id);
     glBindTexture(GL_TEXTURE_2D, atlas->id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, atlas->width, atlas->height,
@@ -159,8 +162,9 @@ int main(int argc, char *argv[])
 
     glfwWindowHint(GLFW_DEPTH_BITS, 16);
     glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+    glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
 
-    window = glfwCreateWindow(300, 300, "Gleam - Hello World", NULL, NULL);
+    window = glfwCreateWindow(900, 900, "Gleam - Hello World", NULL, NULL);
     if (!window)
     {
         fprintf(stderr, "Failed to open GLFW window\n" );
