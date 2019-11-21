@@ -83,6 +83,12 @@ void reshape( GLFWwindow* window, int width, int height )
     mat4_set_orthographic(&projection, 0, width, height, 0, 1, -1);
 }
 
+
+void fillRectangle(float x, float y, float width, float height, vec4 color) {
+    glColor4f(color.r, color.g, color.b, color.a);
+    glRectf(x, y, width, height);
+}
+
 void draw()
 {
     glClearColor(0.5, 05, 0.5, 1);
@@ -107,8 +113,10 @@ void draw()
 
         vertex_buffer_render(buffer, GL_TRIANGLES);
     }
+    glUseProgram(0);
+    
+    fillRectangle(0, 0, 100, 100, {{1, 0, 0, 1}});
 }
-
 
 /* program & OpenGL initialization */
 static void init(void)
