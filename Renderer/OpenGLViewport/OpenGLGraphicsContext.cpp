@@ -77,7 +77,7 @@ namespace
 
     void DrawTextFull(const char* text, const Color& color, unsigned int x, unsigned int y)
     {
-        vec2 pen = { {x, y} };
+        vec2 pen = { {static_cast<float>(x), static_cast<float>(y)} };
         vec4 black = { {color.Red, color.Green, color.Blue, color.Alpha} };
 
         // Load font + necessary glyphs.
