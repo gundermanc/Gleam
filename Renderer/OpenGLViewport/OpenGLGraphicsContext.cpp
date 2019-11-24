@@ -1,5 +1,6 @@
 #include "OpenGLGraphicsContext.h"
 
+#include <vector>
 #include <gl/glew.h>
 #include <freetype-gl/freetype-gl.h>
 #include <freetype-gl/vertex-buffer.h>
@@ -27,6 +28,7 @@ namespace
     mat4 projection;
     texture_atlas_t* atlas = nullptr;
     vertex_buffer_t* buffer = nullptr;
+    std::vector<texture_font_t*> fontCache;
 
     typedef struct {
         float x, y, z;    // position
@@ -75,21 +77,61 @@ namespace
         }
     }
 
-    void DrawTextFull(const char* text, const Color& color, unsigned int x, unsigned int y)
+    texture_font_t* GetOrCreateFont(unsigned int size)
+    {
+        const char* fontFileName = "Content/Cascadia-Code/Cascadia.ttf";
+
+        texture_font_t* font = nullptr;
+
+        // Check cache for the given font.
+        if (size < fontCache.size())
+        {
+            auto font = fontCache[size];
+            if (font != nullptr)
+            {
+                return font;
+            }
+        }
+        else
+        {
+            // If cache is too small for the chosen font size, make it larger.
+            fontCache.resize(size + 1);
+        }
+
+        // Not there.. create it.
+        font = texture_font_new_from_file(atlas, size, fontFileName);
+
+        // Add it to the cache.
+        fontCache[size] = font;
+
+        return font;
+    }
+
+    void CleanupFonts()
+    {
+        for (texture_font_t* font : fontCache)
+        {
+            if (font != nullptr)
+            {
+                texture_font_delete(font);
+            }
+        }
+    }
+
+    void DrawTextFull(const char* text, const Color& color, unsigned int size, unsigned int x, unsigned int y)
     {
         vec2 pen = { {static_cast<float>(x), static_cast<float>(y)} };
         vec4 black = { {color.Red, color.Green, color.Blue, color.Alpha} };
 
-        // Load font + necessary glyphs.
-        const char* filename = "Content/Cascadia-Code/Cascadia.ttf";
-        texture_font_t* font = texture_font_new_from_file(atlas, 27, filename);
+        // Load necessary glyphs.
+        // TODO: this is probably exceptionally inefficient and should instead use a list of unique glyphs?
+        auto font = GetOrCreateFont(size);
         texture_font_load_glyphs(font, text);
 
         AddTextToBuffer(buffer, font, text, &black, &pen);
 
-        texture_font_delete(font);
-
         // Generate and bind textures.
+        // TODO: this should probably not be done each render pass.
         glGenTextures(1, &atlas->id);
         glBindTexture(GL_TEXTURE_2D, atlas->id);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -102,7 +144,6 @@ namespace
     {
         size_t i;
         atlas = texture_atlas_new(512, 512, 1);
-        char* text = "Hello world";
         buffer = vertex_buffer_new("vertex:3f,tex_coord:2f,color:4f");
 
         textShader = shader_load("Content/FreeType-GL/v3f-t2f-c4f.vert", "Content/FreeType-GL/v3f-t2f-c4f.frag");
@@ -114,6 +155,7 @@ namespace
 
     void CleanupText()
     {
+        CleanupFonts();
         glDeleteTextures(1, &atlas->id);
         atlas->id = 0;
         texture_atlas_delete(atlas);
@@ -128,6 +170,11 @@ OpenGLGraphicsContext::OpenGLGraphicsContext()
 OpenGLGraphicsContext::~OpenGLGraphicsContext()
 {
     CleanupText();
+}
+
+void OpenGLGraphicsContext::BeginDrawing()
+{
+    vertex_buffer_clear(buffer);
 }
 
 void OpenGLGraphicsContext::FinalizeDrawing()
@@ -161,9 +208,9 @@ void OpenGLGraphicsContext::Reshape(unsigned int width, unsigned int height)
     mat4_set_orthographic(&projection, 0, width, height, 0, 1, -1);
 }
 
-void OpenGLGraphicsContext::DrawText(const std::string& text, const Color& color, unsigned int x, unsigned int y)
+void OpenGLGraphicsContext::DrawText(const std::string& text, const Color& color, unsigned int size, unsigned int x, unsigned int y)
 {
     // TODO: need to look a bit more closely at how to use textures.
     // Having one for the whole window is probably sub-optimal.
-    DrawTextFull(text.c_str(), color, x, y);
+    DrawTextFull(text.c_str(), color, size, x, y);
 }

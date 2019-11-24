@@ -10,9 +10,10 @@ public:
     OpenGLGraphicsContext();
     ~OpenGLGraphicsContext();
 
+    void BeginDrawing();
     void FinalizeDrawing();
     void Reshape(unsigned int width, unsigned int height);
 
     // Overrides.
-    void DrawText(const std::string& text, const Color& color, unsigned int x, unsigned int y);
+    void DrawText(const std::string& text, const Color& color, unsigned int size, unsigned int x, unsigned int y);
 };
