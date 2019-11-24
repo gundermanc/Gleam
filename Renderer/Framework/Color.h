@@ -17,5 +17,8 @@ public:
 namespace colors
 {
     const Color Black(0.0, 0.0, 0.0, 1.0);
+    const Color Red(1.0, 0.0, 0.0, 1.0);
+    const Color Green(0.0, 1.0, 0.0, 1.0);
+    const Color Blue(0.0, 0.0, 1.0, 1.0);
     const Color White(1.0, 1.0, 1.0, 1.0);
 }

@@ -16,4 +16,6 @@ public:
 
     // Overrides.
     void DrawText(const std::string& text, const Color& color, unsigned int size, unsigned int x, unsigned int y);
+
+    void DrawRect(const Color& color, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
 };

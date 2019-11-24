@@ -2,6 +2,8 @@
 
 void TextSegment::Render(std::shared_ptr<AbstractGraphicsContext> graphicsContext)
 {
+    AbstractControl::Render(graphicsContext);
+
     graphicsContext->DrawText(
         this->GetText().GetValue(),
         this->GetForeground().GetValue(),
@@ -12,5 +14,4 @@ void TextSegment::Render(std::shared_ptr<AbstractGraphicsContext> graphicsContex
 
 void TextSegment::Position(unsigned int maxWidth, unsigned int maxHeight)
 {
-
 }
