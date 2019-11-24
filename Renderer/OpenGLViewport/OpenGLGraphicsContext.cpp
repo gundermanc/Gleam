@@ -120,13 +120,13 @@ namespace
 
     void DrawTextFull(const char* text, const Color& color, unsigned int size, unsigned int x, unsigned int y)
     {
-        vec2 pen = { {static_cast<float>(x), static_cast<float>(y)} };
-        vec4 black = { {color.Red, color.Green, color.Blue, color.Alpha} };
-
         // Load necessary glyphs.
         // TODO: this is probably exceptionally inefficient and should instead use a list of unique glyphs?
         auto font = GetOrCreateFont(size);
         texture_font_load_glyphs(font, text);
+
+        vec2 pen = { {static_cast<float>(x), static_cast<float>(y) + font->height} };
+        vec4 black = { {color.Red, color.Green, color.Blue, color.Alpha} };
 
         AddTextToBuffer(buffer, font, text, &black, &pen);
 
@@ -175,15 +175,15 @@ OpenGLGraphicsContext::~OpenGLGraphicsContext()
 void OpenGLGraphicsContext::BeginDrawing()
 {
     vertex_buffer_clear(buffer);
-}
 
-void OpenGLGraphicsContext::FinalizeDrawing()
-{
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
 
+void OpenGLGraphicsContext::FinalizeDrawing()
+{
     glUseProgram(textShader);
     {
         glUniform1i(glGetUniformLocation(textShader, "texture"),
@@ -213,4 +213,22 @@ void OpenGLGraphicsContext::DrawText(const std::string& text, const Color& color
     // TODO: need to look a bit more closely at how to use textures.
     // Having one for the whole window is probably sub-optimal.
     DrawTextFull(text.c_str(), color, size, x, y);
+}
+
+void OpenGLGraphicsContext::DrawRect(const Color& color, unsigned int x, unsigned int y, unsigned int width, unsigned int height)
+{
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    GLint viewportWidth = viewport[2];
+    GLint viewportHeight = viewport[3];
+
+    // I'm sure there's a more OpenGL-y way to do this but this is effective for now.
+    GLfloat adjustedX = (((float)x / viewportWidth) * 2.0) - 1.0;
+    GLfloat adjustedY = -((((float)y / viewportHeight) * 2.0) - 1.0);
+    GLfloat adjustedWidth = ((float)width / viewportWidth) * 2.0;
+    GLfloat adjustedHeight = ((float)height / viewportHeight) * 2.0;
+
+    glColor4f(color.Red, color.Green, color.Blue, color.Alpha);
+    glRectf(adjustedX, adjustedY, adjustedX + adjustedWidth, adjustedY - adjustedHeight);
 }

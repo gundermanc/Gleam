@@ -99,9 +99,6 @@ void OpenGLViewport::Draw()
 {
     auto background = this->GetBackground().GetValue();
 
-    // Set the background color.
-    glClearColor(background.Red, background.Blue, background.Green, background.Alpha);
-
     // Instruct graphics context to draw any pending textures:
     auto graphicsContext = std::static_pointer_cast<OpenGLGraphicsContext>(this->abstractGraphicsContext);
 
@@ -114,6 +111,9 @@ void OpenGLViewport::Draw()
 
 void OpenGLViewport::Reshape(unsigned int width, unsigned int height)
 {
+    this->GetWidth().SetValue(width);
+    this->GetHeight().SetValue(height);
+
     // Instruct graphics context that we're changing dimensions.
     std::static_pointer_cast<OpenGLGraphicsContext>(this->abstractGraphicsContext)->Reshape(width, height);
 }
