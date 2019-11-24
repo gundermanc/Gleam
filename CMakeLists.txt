@@ -24,6 +24,7 @@ endif()
 add_executable(
     gleam WIN32 MACOSX_BUNDLE
     Renderer/Main.cpp)
+target_link_libraries(gleam PRIVATE RendererFramework)
 target_link_libraries(gleam PRIVATE OpenGLRenderer)
 
 find_package(Freetype REQUIRED)
@@ -34,7 +35,8 @@ find_package(glfw3 CONFIG REQUIRED)
 # Build RenderFramework.. abstraction for the renderer.
 add_library(
     RendererFramework
-    Renderer/Framework/AbstractControl.cpp
+    Renderer/Framework/Controls/AbstractControl.cpp
+    Renderer/Framework/Controls/TextSegment.cpp
     Renderer/Framework/AbstractGraphicsContext.cpp
     Renderer/Framework/AbstractViewport.cpp
     Renderer/Framework/Property.cpp)
