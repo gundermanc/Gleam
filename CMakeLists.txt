@@ -23,26 +23,39 @@ endif()
 # ..........................................
 add_executable(
     gleam WIN32 MACOSX_BUNDLE
-    Renderer/Main.cpp
-    Renderer/Text/mat4.c
-    Renderer/Text/shader.c)
+    Renderer/Main.cpp)
+target_link_libraries(gleam PRIVATE OpenGLRenderer)
 
 find_package(Freetype REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 
-# Set executable dependency libraries
-# Equivalent to pass flags -lGL, -lGLU and -lglut 
-target_link_libraries(gleam PRIVATE GLEW::GLEW)
-target_link_libraries(gleam PRIVATE glfw)
-target_link_libraries(gleam PRIVATE Freetype::Freetype)
+# Build RenderFramework.. abstraction for the renderer.
+add_library(
+    RendererFramework
+    Renderer/Framework/AbstractControl.cpp
+    Renderer/Framework/AbstractGraphicsContext.cpp
+    Renderer/Framework/AbstractViewport.cpp
+    Renderer/Framework/Property.cpp
+    Renderer/Framework/Controls/TextSegment.cpp)
+
+# Build OpenGLFramework.. the OpenGL version of the renderer.
+add_library(
+    OpenGLRenderer
+    Renderer/OpenGLViewport/OpenGLGraphicsContext.cpp
+    Renderer/OpenGLViewport/OpenGLViewport.cpp
+    Renderer/Text/mat4.c
+    Renderer/Text/shader.c)
+target_link_libraries(OpenGLRenderer PRIVATE GLEW::GLEW)
+target_link_libraries(OpenGLRenderer PRIVATE glfw)
+target_link_libraries(OpenGLRenderer PRIVATE Freetype::Freetype)
 
 # Freetype-GL package doesn't seem to have right configuration for install to work.
 if (MSVC)
-    target_link_libraries(gleam PRIVATE "$ENV{VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/${CMAKE_BUILD_TYPE}/lib/freetype-gl.lib")
+    target_link_libraries(OpenGLRenderer PRIVATE "$ENV{VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/${CMAKE_BUILD_TYPE}/lib/freetype-gl.lib")
 else()
-    target_link_libraries(gleam PRIVATE "$ENV{VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/${CMAKE_BUILD_TYPE}/lib/libfreetype-gl.a")
+    target_link_libraries(OpenGLRenderer PRIVATE "$ENV{VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/${CMAKE_BUILD_TYPE}/lib/libfreetype-gl.a")
 endif (MSVC)
 
 add_custom_command(TARGET gleam POST_BUILD
