@@ -37,8 +37,7 @@ add_library(
     Renderer/Framework/AbstractControl.cpp
     Renderer/Framework/AbstractGraphicsContext.cpp
     Renderer/Framework/AbstractViewport.cpp
-    Renderer/Framework/Property.cpp
-    Renderer/Framework/Controls/TextSegment.cpp)
+    Renderer/Framework/Property.cpp)
 
 # Build OpenGLFramework.. the OpenGL version of the renderer.
 add_library(

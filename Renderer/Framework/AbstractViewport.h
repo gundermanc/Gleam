@@ -7,15 +7,12 @@
 #include "AbstractGraphicsContext.h"
 #include "Property.h"
 
-class AbstractViewport : AbstractControl {
+class AbstractViewport : public AbstractControl {
 public:
-    AbstractViewport(std::shared_ptr<AbstractGraphicsContext> graphicsContext, unsigned int width, unsigned int height)
-        : AbstractControl(colors::Black, colors::White, 500, 500)
-    {
-        this->graphicsContext = graphicsContext;
-    }
+    AbstractViewport(std::string title, std::shared_ptr<AbstractGraphicsContext> graphicsContext, unsigned int width, unsigned int height)
+        : title(title), graphicsContext(graphicsContext), AbstractControl(colors::Black, colors::White, 500, 500) { }
 
-    const Property<std::string>& GetTitle() const { return this->title; }
+    Property<std::string>& GetTitle() { return this->title; }
 
 private:
     std::shared_ptr<AbstractGraphicsContext> graphicsContext;

@@ -8,8 +8,9 @@
 class OpenGLViewport : public AbstractViewport
 {
 public:
-    OpenGLViewport(unsigned int width, unsigned int height);
+    OpenGLViewport(std::string title, int width, unsigned int height);
 
+    void BeginEventLoop();
     void Draw();
     void Reshape(unsigned int width, unsigned int height);
 

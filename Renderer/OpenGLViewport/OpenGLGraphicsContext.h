@@ -2,6 +2,7 @@
 
 #include <string>
 #include "../Framework/AbstractGraphicsContext.h"
+#include "../Framework/Color.h"
 
 class OpenGLGraphicsContext : public AbstractGraphicsContext
 {
@@ -13,5 +14,5 @@ public:
     void Reshape(unsigned int width, unsigned int height);
 
     // Overrides.
-    void DrawText(std::string& text, unsigned int x, unsigned int y);
+    void DrawText(const std::string& text, const Color& color, unsigned int x, unsigned int y);
 };

@@ -9,6 +9,11 @@
 #include <GLFW/glfw3.h>
 using namespace ftgl;
 
+// Windows Macro obnoxiously collides with function name here..
+#ifdef DrawText
+#undef DrawText
+#endif // DrawText
+
 namespace
 {
     // Unavoidable (I think) globals 🤮
@@ -24,17 +29,14 @@ namespace
     {
 
     }
-
-    void draw()
-    {
-        viewportSingleton->Draw();
-    }
 }
 
-OpenGLViewport::OpenGLViewport(unsigned int width, unsigned int height) : AbstractViewport(std::shared_ptr<AbstractGraphicsContext>(), width, height)
+OpenGLViewport::OpenGLViewport(std::string title, int width, unsigned int height)
+    : AbstractViewport(title, std::shared_ptr<AbstractGraphicsContext>(), width, height)
 {
     if (!glfwInit())
     {
+        // TODO: logging and exit strategy?
         fprintf(stderr, "Failed to initialize GLFW\n" );
         exit(EXIT_FAILURE);
     }
@@ -71,12 +73,16 @@ OpenGLViewport::OpenGLViewport(unsigned int width, unsigned int height) : Abstra
     viewportSingleton = this;
 
     reshape(window, fbWidth, fbHeight);
+}
+
+void OpenGLViewport::BeginEventLoop()
+{
+    auto window = static_cast<GLFWwindow*>(this->window);
 
     // Main loop
-    while(!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(window))
     {
-        // Draw gears
-        draw();
+        Draw();
 
         // Swap buffers
         glfwSwapBuffers(window);
@@ -87,15 +93,23 @@ OpenGLViewport::OpenGLViewport(unsigned int width, unsigned int height) : Abstra
 
     // Terminate GLFW
     glfwTerminate();
-
-    // Exit program
-    exit( EXIT_SUCCESS );
 }
 
 void OpenGLViewport::Draw()
 {
+    auto background = this->GetBackground().GetValue();
+
+    // Set the background color.
+    glClearColor(background.Red, background.Blue, background.Green, background.Alpha);
+
     // Instruct graphics context to draw any pending textures.
-    std::static_pointer_cast<OpenGLGraphicsContext>(this->abstractGraphicsContext)->FinalizeDrawing();
+    auto graphicsContext = std::static_pointer_cast<OpenGLGraphicsContext>(this->abstractGraphicsContext);
+
+    // TODO: make this into a control type.
+    auto foreground = this->GetForeground().GetValue();
+    graphicsContext->DrawText(std::string("Hello World"), foreground, 70, 70);
+
+    graphicsContext->FinalizeDrawing();
 }
 
 void OpenGLViewport::Reshape(unsigned int width, unsigned int height)
@@ -106,10 +120,10 @@ void OpenGLViewport::Reshape(unsigned int width, unsigned int height)
 
 void OpenGLViewport::Render(std::shared_ptr<AbstractGraphicsContext> graphicsContext)
 {
-
+    // TODO: render children.
 }
 
 void OpenGLViewport::Position(unsigned int maxWidth, unsigned int maxHeight)
 {
-
+    // TODO: what does this do at the top level?
 }
