@@ -107,11 +107,7 @@ void OpenGLViewport::Draw()
 
     graphicsContext->BeginDrawing();
 
-    // TODO: make this into a control type.
-    auto foreground = this->GetForeground().GetValue();
-    graphicsContext->DrawText(std::string("Hello"), foreground, 10, 30, 30);
-    graphicsContext->DrawText(std::string("This is a FreeType-GL"), foreground, 20, 50, 50);
-    graphicsContext->DrawText(std::string("Test program"), foreground, 30, 80, 80);
+    this->Render(this->abstractGraphicsContext);
 
     graphicsContext->FinalizeDrawing();
 }
@@ -120,11 +116,6 @@ void OpenGLViewport::Reshape(unsigned int width, unsigned int height)
 {
     // Instruct graphics context that we're changing dimensions.
     std::static_pointer_cast<OpenGLGraphicsContext>(this->abstractGraphicsContext)->Reshape(width, height);
-}
-
-void OpenGLViewport::Render(std::shared_ptr<AbstractGraphicsContext> graphicsContext)
-{
-    // TODO: render children.
 }
 
 void OpenGLViewport::Position(unsigned int maxWidth, unsigned int maxHeight)

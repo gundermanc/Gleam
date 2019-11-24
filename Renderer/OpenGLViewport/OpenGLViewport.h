@@ -15,7 +15,6 @@ public:
     void Reshape(unsigned int width, unsigned int height);
 
 protected:
-    void Render(std::shared_ptr<AbstractGraphicsContext> graphicsContext);
     void Position(unsigned int maxWidth, unsigned int maxHeight);
 
 private:
