@@ -102,12 +102,16 @@ void OpenGLViewport::Draw()
     // Set the background color.
     glClearColor(background.Red, background.Blue, background.Green, background.Alpha);
 
-    // Instruct graphics context to draw any pending textures.
+    // Instruct graphics context to draw any pending textures:
     auto graphicsContext = std::static_pointer_cast<OpenGLGraphicsContext>(this->abstractGraphicsContext);
+
+    graphicsContext->BeginDrawing();
 
     // TODO: make this into a control type.
     auto foreground = this->GetForeground().GetValue();
-    graphicsContext->DrawText(std::string("Hello World"), foreground, 70, 70);
+    graphicsContext->DrawText(std::string("Hello"), foreground, 10, 30, 30);
+    graphicsContext->DrawText(std::string("This is a FreeType-GL"), foreground, 20, 50, 50);
+    graphicsContext->DrawText(std::string("Test program"), foreground, 30, 80, 80);
 
     graphicsContext->FinalizeDrawing();
 }
