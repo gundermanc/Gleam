@@ -14,9 +14,6 @@ public:
     void Draw();
     void Reshape(unsigned int width, unsigned int height);
 
-protected:
-    void Position(unsigned int maxWidth, unsigned int maxHeight);
-
 private:
     // Store GLFWwindow* as void* to avoid leakage of OpenGL into caller.
     void* window = nullptr;

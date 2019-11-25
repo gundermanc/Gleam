@@ -10,10 +10,19 @@ class AbstractControl
 {
 public:
     AbstractControl(Color background, Color foreground, unsigned int x, unsigned int y, unsigned int width, unsigned int height)
-        : background(background), foreground(foreground), x(x), y(y), width(width), height(height) { }
+        : background(background),
+        foreground(foreground),
+        borderColor(colors::Black),
+        borderThickness(0),
+        x(x),
+        y(y),
+        width(width),
+        height(height) { }
 
     Property<Color>& GetBackground() { return this->background; }
     Property<Color>& GetForeground() { return this->foreground; }
+    Property<Color>& GetBorderColor() { return this->borderColor; }
+    Property<unsigned int>& GetBorderThickness() { return this->borderThickness; }
     Property<unsigned int>& GetX() { return this->x; }
     Property<unsigned int>& GetY() { return this->y; }
     Property<unsigned int>& GetWidth() { return this->width; }
@@ -23,11 +32,16 @@ public:
 
 protected:
     virtual void Render(std::shared_ptr<AbstractGraphicsContext> graphicsContext);
-    virtual void Position(unsigned int maxWidth, unsigned int maxHeight) = 0;
+    virtual void Position(
+        std::shared_ptr<AbstractGraphicsContext> graphicsContext,
+        unsigned int maxWidth,
+        unsigned int maxHeight);
 
 private:
     Property<Color> background;
     Property<Color> foreground;
+    Property<Color> borderColor;
+    Property<unsigned int> borderThickness;
     Property<unsigned int> x;
     Property<unsigned int> y;
     Property<unsigned int> width;

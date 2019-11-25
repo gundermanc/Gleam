@@ -140,6 +140,44 @@ namespace
             0, GL_RED, GL_UNSIGNED_BYTE, atlas->data);
     }
 
+    std::tuple<unsigned int, unsigned int, size_t> ComputeTextDimensionsFull(const char* text, unsigned int size, unsigned int maxWidth)
+    {
+        // Load necessary glyphs.
+        // TODO: this is probably exceptionally inefficient and should instead use a list of unique glyphs?
+        auto font = GetOrCreateFont(size);
+        texture_font_load_glyphs(font, text);
+
+        vec2 originalPen = { 0, 0 };
+        vec2 pen = { 0, 0 };
+
+        size_t i;
+        for (i = 0; i < strlen(text); ++i)
+        {
+            texture_glyph_t* glyph = texture_font_get_glyph(font, text + i);
+            if (glyph != NULL)
+            {
+                float kerning = 0.0f;
+                if (i > 0)
+                {
+                    kerning = texture_glyph_get_kerning(glyph, text + i - 1);
+                }
+
+                auto nextX = pen.x + glyph->advance_x;
+                if (nextX > maxWidth)
+                {
+                    break;
+                }
+
+                pen.x = nextX;
+            }
+        }
+
+        return std::make_tuple(
+            static_cast<unsigned int>(pen.x - originalPen.x),
+            static_cast<unsigned int>(font->height),
+            i);
+    }
+
     void InitializeText()
     {
         size_t i;
@@ -159,6 +197,21 @@ namespace
         glDeleteTextures(1, &atlas->id);
         atlas->id = 0;
         texture_atlas_delete(atlas);
+    }
+
+    void MapAbsoluteCoordinatesToUnitOrtho(float& x, float& y, float& width, float& height)
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+
+        GLint viewportWidth = viewport[2];
+        GLint viewportHeight = viewport[3];
+
+        // I'm sure there's a more OpenGL-y way to do this but this is effective for now.
+        x = (((float)x / viewportWidth) * 2.0) - 1.0;
+        y = -((((float)y / viewportHeight) * 2.0) - 1.0);
+        width = ((float)width / viewportWidth) * 2.0;
+        height = ((float)height / viewportHeight) * 2.0;
     }
 }
 
@@ -208,6 +261,15 @@ void OpenGLGraphicsContext::Reshape(unsigned int width, unsigned int height)
     mat4_set_orthographic(&projection, 0, width, height, 0, 1, -1);
 }
 
+// Returns width, height, and number of characters consumed before hitting maxWidth or maxHeight.
+std::tuple<unsigned int, unsigned int, size_t> OpenGLGraphicsContext::ComputeTextDimensions(
+    const std::string& text,
+    unsigned int size,
+    unsigned int maxWidth)
+{
+    return ComputeTextDimensionsFull(text.c_str(), size, maxWidth);
+}
+
 void OpenGLGraphicsContext::DrawText(const std::string& text, const Color& color, unsigned int size, unsigned int x, unsigned int y)
 {
     // TODO: need to look a bit more closely at how to use textures.
@@ -217,18 +279,35 @@ void OpenGLGraphicsContext::DrawText(const std::string& text, const Color& color
 
 void OpenGLGraphicsContext::DrawRect(const Color& color, unsigned int x, unsigned int y, unsigned int width, unsigned int height)
 {
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
-    GLint viewportWidth = viewport[2];
-    GLint viewportHeight = viewport[3];
-
-    // I'm sure there's a more OpenGL-y way to do this but this is effective for now.
-    GLfloat adjustedX = (((float)x / viewportWidth) * 2.0) - 1.0;
-    GLfloat adjustedY = -((((float)y / viewportHeight) * 2.0) - 1.0);
-    GLfloat adjustedWidth = ((float)width / viewportWidth) * 2.0;
-    GLfloat adjustedHeight = ((float)height / viewportHeight) * 2.0;
+    float adjustedX = x;
+    float adjustedY = y;
+    float adjustedWidth = width;
+    float adjustedHeight = height;
+    MapAbsoluteCoordinatesToUnitOrtho(adjustedX, adjustedY, adjustedWidth, adjustedHeight);
 
     glColor4f(color.Red, color.Green, color.Blue, color.Alpha);
     glRectf(adjustedX, adjustedY, adjustedX + adjustedWidth, adjustedY - adjustedHeight);
+}
+
+void OpenGLGraphicsContext::DrawRectOutline(const Color& color, unsigned int thickness, unsigned x, unsigned int y, unsigned int width, unsigned int height)
+{
+    if (thickness == 0)
+    {
+        return;
+    }
+
+    float adjustedX = x;
+    float adjustedY = y;
+    float adjustedWidth = width;
+    float adjustedHeight = height;
+    MapAbsoluteCoordinatesToUnitOrtho(adjustedX, adjustedY, adjustedWidth, adjustedHeight);
+
+    glLineWidth(thickness);
+    glColor4f(color.Red, color.Green, color.Blue, color.Alpha);
+    glBegin(GL_LINE_LOOP);
+        glVertex2f(adjustedX, adjustedY);
+        glVertex2f(adjustedX + adjustedWidth, adjustedY);
+        glVertex2f(adjustedX + adjustedWidth, adjustedY - adjustedHeight);
+        glVertex2f(adjustedX, adjustedY - adjustedHeight);
+    glEnd();
 }
