@@ -9,8 +9,8 @@
 #include <GLFW/glfw3.h>
 
 // Include copied sources from Freetype-GL samples. ❤
-#include "../Text/mat4.h"
-#include "../Text/shader.h"
+#include "Text/mat4.h"
+#include "Text/shader.h"
 
 using namespace ftgl;
 
@@ -162,8 +162,8 @@ namespace
                     kerning = texture_glyph_get_kerning(glyph, text + i - 1);
                 }
 
-                auto nextX = pen.x + glyph->advance_x;
-                if (nextX > maxWidth)
+                auto nextX = pen.x + kerning + glyph->advance_x;
+                if (nextX > maxWidth || text[i] == '\n')
                 {
                     break;
                 }
