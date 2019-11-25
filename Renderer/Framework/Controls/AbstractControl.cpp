@@ -21,4 +21,8 @@ void AbstractControl::Position(
     unsigned int maxWidth,
     unsigned int maxHeight)
 {
+    for (std::shared_ptr<AbstractControl> control : this->GetChildren())
+    {
+        control->Position(graphicsContext, this->GetWidth().GetValue(), this->GetHeight().GetValue());
+    }
 }

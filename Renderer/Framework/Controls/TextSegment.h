@@ -8,8 +8,7 @@ enum class AlignmentMode
 {
     Left,
     Right,
-    Center,
-    Stretch
+    Center
 };
 
 class TextSegment : public AbstractControl

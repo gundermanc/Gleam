@@ -24,9 +24,16 @@ void TextSegment::Position(
         this->textYOffset = 0;
         return;
     case AlignmentMode::Right:
+    {
         auto dimensions = graphicsContext->ComputeTextDimensions(this->GetText().GetValue(), this->GetFontSize().GetValue());
         this->textXOffset = this->GetWidth().GetValue() - std::get<0>(dimensions);
-        this->textYOffset = this->GetHeight().GetValue() - std::get<1>(dimensions);
-        break;
+        return;
+    }
+    case AlignmentMode::Center:
+    {
+        auto dimensions = graphicsContext->ComputeTextDimensions(this->GetText().GetValue(), this->GetFontSize().GetValue());
+        this->textXOffset = (this->GetWidth().GetValue() - std::get<0>(dimensions)) / 2.0;
+        return;
+    }
     }
 }

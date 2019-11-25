@@ -140,7 +140,7 @@ namespace
             0, GL_RED, GL_UNSIGNED_BYTE, atlas->data);
     }
 
-    std::tuple<unsigned int, unsigned int> ComputeTextDimensions(const char* text, unsigned int size)
+    std::tuple<unsigned int, unsigned int> ComputeTextDimensionsFull(const char* text, unsigned int size)
     {
         // Load necessary glyphs.
         // TODO: this is probably exceptionally inefficient and should instead use a list of unique glyphs?
@@ -240,7 +240,7 @@ void OpenGLGraphicsContext::Reshape(unsigned int width, unsigned int height)
 
 std::tuple<unsigned int, unsigned int> OpenGLGraphicsContext::ComputeTextDimensions(const std::string& text, unsigned int size)
 {
-    return ComputeTextDimensions(text.c_str(), size);
+    return ComputeTextDimensionsFull(text.c_str(), size);
 }
 
 void OpenGLGraphicsContext::DrawText(const std::string& text, const Color& color, unsigned int size, unsigned int x, unsigned int y)
