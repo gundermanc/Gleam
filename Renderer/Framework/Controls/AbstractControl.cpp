@@ -15,3 +15,10 @@ void AbstractControl::Render(std::shared_ptr<AbstractGraphicsContext> graphicsCo
         control->Render(graphicsContext);
     }
 }
+
+void AbstractControl::Position(
+    std::shared_ptr<AbstractGraphicsContext> graphicsContext,
+    unsigned int maxWidth,
+    unsigned int maxHeight)
+{
+}

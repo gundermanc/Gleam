@@ -102,10 +102,12 @@ void OpenGLViewport::Draw()
     // Instruct graphics context to draw any pending textures:
     auto graphicsContext = std::static_pointer_cast<OpenGLGraphicsContext>(this->abstractGraphicsContext);
 
+    // Compute control positions, if needed.
+    this->Position(graphicsContext, this->GetWidth().GetValue(), this->GetHeight().GetValue());
+
+    // Re-render.
     graphicsContext->BeginDrawing();
-
     this->Render(this->abstractGraphicsContext);
-
     graphicsContext->FinalizeDrawing();
 }
 
@@ -116,9 +118,4 @@ void OpenGLViewport::Reshape(unsigned int width, unsigned int height)
 
     // Instruct graphics context that we're changing dimensions.
     std::static_pointer_cast<OpenGLGraphicsContext>(this->abstractGraphicsContext)->Reshape(width, height);
-}
-
-void OpenGLViewport::Position(unsigned int maxWidth, unsigned int maxHeight)
-{
-    // TODO: what does this do at the top level?
 }

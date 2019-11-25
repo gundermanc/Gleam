@@ -140,6 +140,36 @@ namespace
             0, GL_RED, GL_UNSIGNED_BYTE, atlas->data);
     }
 
+    std::tuple<unsigned int, unsigned int> ComputeTextDimensions(const char* text, unsigned int size)
+    {
+        // Load necessary glyphs.
+        // TODO: this is probably exceptionally inefficient and should instead use a list of unique glyphs?
+        auto font = GetOrCreateFont(size);
+        texture_font_load_glyphs(font, text);
+
+        vec2 originalPen = { 0, 0 };
+        vec2 pen = { 0, 0 };
+
+        for (size_t i = 0; i < strlen(text); ++i)
+        {
+            texture_glyph_t* glyph = texture_font_get_glyph(font, text + i);
+            if (glyph != NULL)
+            {
+                float kerning = 0.0f;
+                if (i > 0)
+                {
+                    kerning = texture_glyph_get_kerning(glyph, text + i - 1);
+                }
+
+                pen.x += glyph->advance_x;
+            }
+        }
+
+        return std::make_pair(
+            static_cast<unsigned int>(pen.x - originalPen.x),
+            static_cast<unsigned int>(pen.y - originalPen.y));
+    }
+
     void InitializeText()
     {
         size_t i;
@@ -206,6 +236,11 @@ void OpenGLGraphicsContext::FinalizeDrawing()
 void OpenGLGraphicsContext::Reshape(unsigned int width, unsigned int height)
 {
     mat4_set_orthographic(&projection, 0, width, height, 0, 1, -1);
+}
+
+std::tuple<unsigned int, unsigned int> OpenGLGraphicsContext::ComputeTextDimensions(const std::string& text, unsigned int size)
+{
+    return ComputeTextDimensions(text.c_str(), size);
 }
 
 void OpenGLGraphicsContext::DrawText(const std::string& text, const Color& color, unsigned int size, unsigned int x, unsigned int y)

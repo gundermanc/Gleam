@@ -23,7 +23,10 @@ public:
 
 protected:
     virtual void Render(std::shared_ptr<AbstractGraphicsContext> graphicsContext);
-    virtual void Position(unsigned int maxWidth, unsigned int maxHeight) = 0;
+    virtual void Position(
+        std::shared_ptr<AbstractGraphicsContext> graphicsContext,
+        unsigned int maxWidth,
+        unsigned int maxHeight);
 
 private:
     Property<Color> background;

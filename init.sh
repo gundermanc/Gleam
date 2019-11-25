@@ -15,7 +15,7 @@ set $VCPKG_ROOT="./vcpkg"
 git submodule init
 git submodule update
 pushd ./vcpkg
-./bootstrap-vcpkg.sh # if this fails on 10.15, try with --allowAppleClang
+./bootstrap-vcpkg.sh --allowAppleClang # if this fails on 10.15, try with --allowAppleClang
 
 # # Install required vcpkgs.
 # TODO: support linux.
