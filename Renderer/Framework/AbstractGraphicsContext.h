@@ -7,7 +7,7 @@
 class AbstractGraphicsContext
 {
 public:
-    virtual std::tuple<unsigned int, unsigned int, unsigned int> ComputeTextDimensions(
+    virtual std::tuple<unsigned int, unsigned int, size_t> ComputeTextDimensions(
         const std::string& text,
         unsigned int size,
         unsigned int maxWidth) = 0;

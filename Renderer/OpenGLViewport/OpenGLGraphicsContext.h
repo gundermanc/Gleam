@@ -15,7 +15,7 @@ public:
     void Reshape(unsigned int width, unsigned int height);
 
     // Overrides.
-    std::tuple<unsigned int, unsigned int, unsigned int> ComputeTextDimensions(
+    std::tuple<unsigned int, unsigned int, size_t> ComputeTextDimensions(
         const std::string& text,
         unsigned int size,
         unsigned int maxWidth);
