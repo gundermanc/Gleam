@@ -18,8 +18,8 @@ void ShowCommandLineHelpView(AbstractViewport& viewport)
     auto nameTextSegment = new TextSegment(
         std::string("Untitled Christian Gunderman project"),
         30,
-        colors::White,
         colors::Black,
+        colors::Green,
         30,
         30,
         viewport.GetWidth().GetValue() - 60,
@@ -40,8 +40,8 @@ void ShowCommandLineHelpView(AbstractViewport& viewport)
     auto helpTextSegment = new TextSegment(
         std::string(CommandLineHelpText),
         20,
-        colors::White,
         colors::Black,
+        colors::Green,
         30,
         110,
         viewport.GetWidth().GetValue() - 60,

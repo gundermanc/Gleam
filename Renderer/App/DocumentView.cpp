@@ -13,8 +13,8 @@ void ShowDocumentView(AbstractViewport& viewport, const std::string& filePath)
 
     // Document view border --------------------------------
     auto documentBorder = new Border(
-        colors::White,
         colors::Black,
+        colors::Green,
         2,
         15,
         15,
@@ -48,8 +48,8 @@ void ShowDocumentView(AbstractViewport& viewport, const std::string& filePath)
         auto currentLine = new TextSegment(
             line,
             12,
-            colors::White,
             colors::Black,
+            colors::Green,
             20,
             y,
             viewport.GetWidth().GetValue() - 40,
