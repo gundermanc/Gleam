@@ -123,7 +123,6 @@ namespace
         // Load necessary glyphs.
         // TODO: this is probably exceptionally inefficient and should instead use a list of unique glyphs?
         auto font = GetOrCreateFont(size);
-        texture_font_load_glyphs(font, text);
 
         vec2 pen = { {static_cast<float>(x), static_cast<float>(y) + font->height} };
         vec4 black = { {color.Red, color.Green, color.Blue, color.Alpha} };
@@ -132,7 +131,6 @@ namespace
 
         // Generate and bind textures.
         // TODO: this should probably not be done each render pass.
-        glGenTextures(1, &atlas->id);
         glBindTexture(GL_TEXTURE_2D, atlas->id);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -145,7 +143,6 @@ namespace
         // Load necessary glyphs.
         // TODO: this is probably exceptionally inefficient and should instead use a list of unique glyphs?
         auto font = GetOrCreateFont(size);
-        texture_font_load_glyphs(font, text);
 
         vec2 originalPen = { 0, 0 };
         vec2 pen = { 0, 0 };
@@ -182,6 +179,7 @@ namespace
     {
         size_t i;
         atlas = texture_atlas_new(512, 512, 1);
+        glGenTextures(1, &atlas->id);
         buffer = vertex_buffer_new("vertex:3f,tex_coord:2f,color:4f");
 
         textShader = shader_load("Content/FreeType-GL/v3f-t2f-c4f.vert", "Content/FreeType-GL/v3f-t2f-c4f.frag");
