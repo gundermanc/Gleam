@@ -74,6 +74,12 @@ void TextSegment::ComputeTextClipping(std::shared_ptr<AbstractGraphicsContext> g
             break;
         }
 
+        // If we terminated this line on a line ending, drop it from the next line.
+        if (text[consumed] == '\n')
+        {
+            consumed++;
+        }
+
         // Advance.
         text = text.substr(consumed, text.length() - consumed);
     } while (text.length() > 0);

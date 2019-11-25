@@ -26,6 +26,7 @@ add_executable(
     Renderer/Main.cpp)
 target_link_libraries(gleam PRIVATE RendererFramework)
 target_link_libraries(gleam PRIVATE OpenGLRenderer)
+target_link_libraries(gleam PRIVATE AppLibrary)
 
 find_package(Freetype REQUIRED)
 find_package(glad CONFIG REQUIRED)
@@ -46,11 +47,18 @@ add_library(
     OpenGLRenderer
     Renderer/OpenGLViewport/OpenGLGraphicsContext.cpp
     Renderer/OpenGLViewport/OpenGLViewport.cpp
-    Renderer/Text/mat4.c
-    Renderer/Text/shader.c)
+    Renderer/OpenGLViewport/Text/mat4.c
+    Renderer/OpenGLViewport/Text/shader.c)
 target_link_libraries(OpenGLRenderer PRIVATE GLEW::GLEW)
 target_link_libraries(OpenGLRenderer PRIVATE glfw)
 target_link_libraries(OpenGLRenderer PRIVATE Freetype::Freetype)
+
+# Build xplat app. Has no awareness of OpenGl, only the RendererFramework.
+add_library(
+    AppLibrary
+    Renderer/App/CommandLineHelpView.cpp
+    Renderer/App/DocumentView.cpp)
+target_link_libraries(AppLibrary RendererFramework)
 
 # Freetype-GL package doesn't seem to have right configuration for install to work.
 if (MSVC)

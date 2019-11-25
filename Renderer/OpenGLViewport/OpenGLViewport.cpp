@@ -1,5 +1,5 @@
 #include "OpenGLViewport.h"
-#include "../Text/mat4.h"
+#include "Text/mat4.h"
 
 #include <gl/glew.h>
 #include <freetype-gl/freetype-gl.h>
