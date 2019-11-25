@@ -140,7 +140,7 @@ namespace
             0, GL_RED, GL_UNSIGNED_BYTE, atlas->data);
     }
 
-    std::tuple<unsigned int, unsigned int> ComputeTextDimensionsFull(const char* text, unsigned int size)
+    std::tuple<unsigned int, unsigned int, size_t> ComputeTextDimensionsFull(const char* text, unsigned int size, unsigned int maxWidth)
     {
         // Load necessary glyphs.
         // TODO: this is probably exceptionally inefficient and should instead use a list of unique glyphs?
@@ -150,7 +150,8 @@ namespace
         vec2 originalPen = { 0, 0 };
         vec2 pen = { 0, 0 };
 
-        for (size_t i = 0; i < strlen(text); ++i)
+        size_t i;
+        for (i = 0; i < strlen(text); ++i)
         {
             texture_glyph_t* glyph = texture_font_get_glyph(font, text + i);
             if (glyph != NULL)
@@ -161,13 +162,20 @@ namespace
                     kerning = texture_glyph_get_kerning(glyph, text + i - 1);
                 }
 
-                pen.x += glyph->advance_x;
+                auto nextX = pen.x + glyph->advance_x;
+                if (nextX > maxWidth)
+                {
+                    break;
+                }
+
+                pen.x = nextX;
             }
         }
 
-        return std::make_pair(
+        return std::make_tuple(
             static_cast<unsigned int>(pen.x - originalPen.x),
-            static_cast<unsigned int>(pen.y - originalPen.y));
+            static_cast<unsigned int>(font->height),
+            i);
     }
 
     void InitializeText()
@@ -238,9 +246,13 @@ void OpenGLGraphicsContext::Reshape(unsigned int width, unsigned int height)
     mat4_set_orthographic(&projection, 0, width, height, 0, 1, -1);
 }
 
-std::tuple<unsigned int, unsigned int> OpenGLGraphicsContext::ComputeTextDimensions(const std::string& text, unsigned int size)
+// Returns width, height, and number of characters consumed before hitting maxWidth or maxHeight.
+std::tuple<unsigned int, unsigned int, size_t> OpenGLGraphicsContext::ComputeTextDimensions(
+    const std::string& text,
+    unsigned int size,
+    unsigned int maxWidth)
 {
-    return ComputeTextDimensionsFull(text.c_str(), size);
+    return ComputeTextDimensionsFull(text.c_str(), size, maxWidth);
 }
 
 void OpenGLGraphicsContext::DrawText(const std::string& text, const Color& color, unsigned int size, unsigned int x, unsigned int y)

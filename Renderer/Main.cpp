@@ -8,9 +8,10 @@ int main(int argc, char *argv[])
     OpenGLViewport viewport("Gleam - hello world", 700, 500);
 
     // Layout UX.
-    auto segment0 = new TextSegment(std::string("Hello there"), 10, colors::Red, colors::Black, 0, 0, 100, 20);
+    auto segment0 = new TextSegment(std::string("\"Hello there\"   --Obi Wan Kenobi"), 10, colors::Red, colors::Black, 0, 0, 100, 20);
     auto segmentPointer0 = std::shared_ptr<AbstractControl>(segment0);
     segment0->GetTextAlignment().SetValue(AlignmentMode::Left);
+    segment0->GetTextClippingMode().SetValue(TextClippingMode::Ellipsis);
 
 
     auto segment1 = new TextSegment(std::string("This is an.."), 20, colors::Blue, colors::White, 20, 20, 200, 30);
@@ -18,9 +19,10 @@ int main(int argc, char *argv[])
     segment1->GetTextAlignment().SetValue(AlignmentMode::Right);
 
 
-    auto segment2 = new TextSegment(std::string("Untitled Christian Gunderman project"), 30, colors::Green, colors::Black, 30, 50, 700, 40);
+    auto segment2 = new TextSegment(std::string("Untitled Christian Gunderman project"), 30, colors::Green, colors::Black, 30, 50, 500, 200);
     auto segmentPointer2 = std::shared_ptr<AbstractControl>(segment2);
     segment2->GetTextAlignment().SetValue(AlignmentMode::Center);
+    segment2->GetTextClippingMode().SetValue(TextClippingMode::Wrap);
 
 
     viewport.GetChildren().push_back(segmentPointer0);
