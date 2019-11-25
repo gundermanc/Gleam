@@ -198,6 +198,21 @@ namespace
         atlas->id = 0;
         texture_atlas_delete(atlas);
     }
+
+    void MapAbsoluteCoordinatesToUnitOrtho(float& x, float& y, float& width, float& height)
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+
+        GLint viewportWidth = viewport[2];
+        GLint viewportHeight = viewport[3];
+
+        // I'm sure there's a more OpenGL-y way to do this but this is effective for now.
+        x = (((float)x / viewportWidth) * 2.0) - 1.0;
+        y = -((((float)y / viewportHeight) * 2.0) - 1.0);
+        width = ((float)width / viewportWidth) * 2.0;
+        height = ((float)height / viewportHeight) * 2.0;
+    }
 }
 
 OpenGLGraphicsContext::OpenGLGraphicsContext()
@@ -264,18 +279,35 @@ void OpenGLGraphicsContext::DrawText(const std::string& text, const Color& color
 
 void OpenGLGraphicsContext::DrawRect(const Color& color, unsigned int x, unsigned int y, unsigned int width, unsigned int height)
 {
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
-    GLint viewportWidth = viewport[2];
-    GLint viewportHeight = viewport[3];
-
-    // I'm sure there's a more OpenGL-y way to do this but this is effective for now.
-    GLfloat adjustedX = (((float)x / viewportWidth) * 2.0) - 1.0;
-    GLfloat adjustedY = -((((float)y / viewportHeight) * 2.0) - 1.0);
-    GLfloat adjustedWidth = ((float)width / viewportWidth) * 2.0;
-    GLfloat adjustedHeight = ((float)height / viewportHeight) * 2.0;
+    float adjustedX = x;
+    float adjustedY = y;
+    float adjustedWidth = width;
+    float adjustedHeight = height;
+    MapAbsoluteCoordinatesToUnitOrtho(adjustedX, adjustedY, adjustedWidth, adjustedHeight);
 
     glColor4f(color.Red, color.Green, color.Blue, color.Alpha);
     glRectf(adjustedX, adjustedY, adjustedX + adjustedWidth, adjustedY - adjustedHeight);
+}
+
+void OpenGLGraphicsContext::DrawRectOutline(const Color& color, unsigned int thickness, unsigned x, unsigned int y, unsigned int width, unsigned int height)
+{
+    if (thickness == 0)
+    {
+        return;
+    }
+
+    float adjustedX = x;
+    float adjustedY = y;
+    float adjustedWidth = width;
+    float adjustedHeight = height;
+    MapAbsoluteCoordinatesToUnitOrtho(adjustedX, adjustedY, adjustedWidth, adjustedHeight);
+
+    glLineWidth(thickness);
+    glColor4f(color.Red, color.Green, color.Blue, color.Alpha);
+    glBegin(GL_LINE_LOOP);
+        glVertex2f(adjustedX, adjustedY);
+        glVertex2f(adjustedX + adjustedWidth, adjustedY);
+        glVertex2f(adjustedX + adjustedWidth, adjustedY - adjustedHeight);
+        glVertex2f(adjustedX, adjustedY - adjustedHeight);
+    glEnd();
 }
