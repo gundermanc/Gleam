@@ -17,7 +17,8 @@ public:
         this->textDocument = textDocument;
     }
 
-    Property<unsigned int> GetFontSize() { return this->fontSize; }
+    Property<unsigned int>& GetFontSize() { return this->fontSize; }
+    Property<unsigned int>& GetScrollLine() { return this->scrollLine; }
 
 protected:
     void Position(
@@ -25,8 +26,10 @@ protected:
         unsigned int maxWidth,
         unsigned int maxHeight);
 
+    void Scroll(int x, int y, int scrollX, int scrollY);
+
 private:
     Property<unsigned int> fontSize;
+    Property<unsigned int> scrollLine = 0;
     std::shared_ptr<TextDocument> textDocument;
-    unsigned int scrollLine = 0;
 };

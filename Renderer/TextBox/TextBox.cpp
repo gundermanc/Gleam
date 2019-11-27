@@ -13,9 +13,14 @@ void TextBox::Position(
 
     auto lineHeight = std::get<1>(dimensions);
 
+    auto lines = this->textDocument->GetLines();
+    auto initialLine = this->GetScrollLine().GetValue();
+
     int y = this->GetY().GetValue();
-    for (auto& line : this->textDocument->GetLines())
+    for (size_t lineNumber = initialLine; lineNumber < lines.size(); lineNumber++)
     {
+        const std::string& line = lines[lineNumber];
+
         // Draw only the visible portion.
         if (y >= this->GetHeight().GetValue())
         {
@@ -41,4 +46,16 @@ void TextBox::Position(
         graphicsContext,
         maxWidth,
         maxHeight);
+}
+
+void TextBox::Scroll(int x, int y, int scrollX, int scrollY)
+{
+    auto& scrollLineProperty = this->GetScrollLine();
+    auto scrollLinePropertyValue = scrollLineProperty.GetValue();
+
+    if ((scrollLinePropertyValue > 0 && scrollY > 0) ||
+        (scrollLinePropertyValue < (this->textDocument->GetLines().size() - 1) && scrollY < 0))
+    {
+        scrollLineProperty.SetValue(scrollLinePropertyValue - scrollY);
+    }
 }

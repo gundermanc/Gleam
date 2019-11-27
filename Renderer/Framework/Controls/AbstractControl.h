@@ -29,6 +29,8 @@ public:
     Property<unsigned int>& GetHeight() { return this->height; }
 
     std::vector<std::shared_ptr<AbstractControl>>& GetChildren() { return this->children; }
+    virtual void Scroll(int x, int y, int scrollX, int scrollY);
+
 
 protected:
     virtual void Render(std::shared_ptr<AbstractGraphicsContext> graphicsContext);

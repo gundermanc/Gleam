@@ -29,6 +29,15 @@ namespace
     {
 
     }
+
+    void scroll(GLFWwindow* window, double scrollX, double scrollY)
+    {
+        double x;
+        double y;
+        glfwGetCursorPos(window, &x, &y);
+
+        viewportSingleton->Scroll(x, y, scrollX, scrollY);
+    }
 }
 
 OpenGLViewport::OpenGLViewport(std::string title, int width, unsigned int height)
@@ -57,6 +66,7 @@ OpenGLViewport::OpenGLViewport(std::string title, int width, unsigned int height
     // Set callback functions
     glfwSetFramebufferSizeCallback(window, reshape);
     glfwSetKeyCallback(window, key);
+    glfwSetScrollCallback(window, scroll);
 
     glfwMakeContextCurrent(window);
 
