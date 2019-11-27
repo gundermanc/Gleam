@@ -52,9 +52,10 @@ void TextBox::Scroll(int x, int y, int scrollX, int scrollY)
 {
     auto& scrollLineProperty = this->GetScrollLine();
     auto scrollLinePropertyValue = scrollLineProperty.GetValue();
+    auto updatedScrollLinePropertyValue = scrollLinePropertyValue + scrollY;
 
-    if ((scrollLinePropertyValue > 0 && scrollY > 0) ||
-        (scrollLinePropertyValue < (this->textDocument->GetLines().size() - 1) && scrollY < 0))
+    if (updatedScrollLinePropertyValue >= 0 &&
+        (updatedScrollLinePropertyValue < this->textDocument->GetLines().size() - 1))
     {
         scrollLineProperty.SetValue(scrollLinePropertyValue - scrollY);
     }
