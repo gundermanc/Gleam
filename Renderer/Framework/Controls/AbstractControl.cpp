@@ -35,3 +35,25 @@ void AbstractControl::Position(
         control->Position(graphicsContext, this->GetWidth().GetValue(), this->GetHeight().GetValue());
     }
 }
+
+void AbstractControl::Scroll(int x, int y, int scrollX, int scrollY)
+{
+    // Find control under the cursor.
+    for (auto& control : this->GetChildren())
+    {
+        auto controlX0 = control->GetX().GetValue();
+        auto controlY0 = control->GetY().GetValue();
+        auto controlX1 = control->GetWidth().GetValue() + controlX0;
+        auto controlY1 = control->GetHeight().GetValue() + controlY0;
+
+        // Does current control contain this point?
+        if (x >= controlX0 &&
+            x <= controlX1 &&
+            y >= controlY0 &&
+            y <= controlY1)
+        {
+            // Yes, dispatch to child control.
+            control->Scroll(x - controlX0, y - controlY0, scrollX, scrollY);
+        }
+    }
+}

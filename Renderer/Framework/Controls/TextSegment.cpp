@@ -59,7 +59,7 @@ void TextSegment::ComputeTextClipping(std::shared_ptr<AbstractGraphicsContext> g
 
         // Break if we run out of vertical space.
         this->wrappingFontHeight = std::get<1>(dimensions);
-        if ((y + this->wrappingFontHeight) >= this->GetHeight().GetValue())
+        if ((y + this->wrappingFontHeight) > this->GetHeight().GetValue())
         {
             break;
         }
