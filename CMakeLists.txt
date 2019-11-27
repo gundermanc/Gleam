@@ -53,12 +53,24 @@ target_link_libraries(OpenGLRenderer PRIVATE GLEW::GLEW)
 target_link_libraries(OpenGLRenderer PRIVATE glfw)
 target_link_libraries(OpenGLRenderer PRIVATE Freetype::Freetype)
 
+# Build Text library.. library for opening and interacting with text and files.
+add_library(
+    TextLibrary
+    Renderer/Text/TextDocument.cpp)
+
+# Build Text box library.. library for displaying files.
+add_library(
+    TextBox
+    Renderer/TextBox/TextBox.cpp)
+
 # Build xplat app. Has no awareness of OpenGl, only the RendererFramework.
 add_library(
     AppLibrary
     Renderer/App/CommandLineHelpView.cpp
     Renderer/App/DocumentView.cpp)
 target_link_libraries(AppLibrary RendererFramework)
+target_link_libraries(AppLibrary TextLibrary)
+target_link_libraries(AppLibrary TextBox)
 
 # Freetype-GL package doesn't seem to have right configuration for install to work.
 if (MSVC)

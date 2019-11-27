@@ -16,6 +16,7 @@ public:
 
 namespace colors
 {
+    const Color Transparent(0.0, 0.0, 0.0, 0.0);
     const Color Black(0.0, 0.0, 0.0, 1.0);
     const Color Gray(0.5, 0.5, 0.5, 1.0);
     const Color Red(1.0, 0.0, 0.0, 1.0);
