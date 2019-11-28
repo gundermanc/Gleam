@@ -1,14 +1,17 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include "../Framework/AbstractGraphicsContext.h"
 #include "../Framework/Color.h"
+
+// Forward declare OpenGLTextContext to avoid leakage of OpenGL via an include.
+class OpenGLTextContext;
 
 class OpenGLGraphicsContext : public AbstractGraphicsContext
 {
 public:
     OpenGLGraphicsContext();
-    ~OpenGLGraphicsContext();
 
     void BeginDrawing();
     void FinalizeDrawing();
@@ -25,4 +28,7 @@ public:
     void DrawRect(const Color& color, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
 
     void DrawRectOutline(const Color& color, unsigned int thickness, unsigned x, unsigned int y, unsigned int width, unsigned int height);
+
+private:
+    std::shared_ptr<OpenGLTextContext> textContext;
 };

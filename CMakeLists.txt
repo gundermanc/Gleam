@@ -48,6 +48,7 @@ add_library(
     Renderer/OpenGLViewport/OpenGLGraphicsContext.cpp
     Renderer/OpenGLViewport/OpenGLViewport.cpp
     Renderer/OpenGLViewport/Text/mat4.c
+    Renderer/OpenGLViewport/Text/OpenGLTextContext.cpp
     Renderer/OpenGLViewport/Text/shader.c)
 target_link_libraries(OpenGLRenderer PRIVATE GLEW::GLEW)
 target_link_libraries(OpenGLRenderer PRIVATE glfw)
