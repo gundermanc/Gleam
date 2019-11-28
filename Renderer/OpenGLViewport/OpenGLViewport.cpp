@@ -9,11 +9,6 @@
 #include <GLFW/glfw3.h>
 using namespace ftgl;
 
-// Windows Macro obnoxiously collides with function name here..
-#ifdef DrawText
-#undef DrawText
-#endif // DrawText
-
 namespace
 {
     // Unavoidable (I think) global 🤮
