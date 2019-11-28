@@ -2,6 +2,17 @@
 
 void AbstractControl::Render(std::shared_ptr<AbstractGraphicsContext> graphicsContext)
 {
+    // Check if we need to relayout.
+    if (this->GetIsPositionInvalid().GetValue())
+    {
+        this->Position(
+            graphicsContext,
+            this->GetWidth().GetValue(),
+            this->GetHeight().GetValue());
+
+        this->GetIsPositionInvalid().SetValue(true);
+    }
+
     // Shade control background.
     graphicsContext->DrawRect(
         this->GetBackground().GetValue(),

@@ -17,7 +17,8 @@ public:
         x(x),
         y(y),
         width(width),
-        height(height) { }
+        height(height),
+        isPositionInvalid(false) { }
 
     Property<Color>& GetBackground() { return this->background; }
     Property<Color>& GetForeground() { return this->foreground; }
@@ -27,6 +28,7 @@ public:
     Property<unsigned int>& GetY() { return this->y; }
     Property<unsigned int>& GetWidth() { return this->width; }
     Property<unsigned int>& GetHeight() { return this->height; }
+    Property<bool>& GetIsPositionInvalid() { return this->isPositionInvalid; }
 
     std::vector<std::shared_ptr<AbstractControl>>& GetChildren() { return this->children; }
     virtual void Scroll(int x, int y, int scrollX, int scrollY);
@@ -48,6 +50,7 @@ private:
     Property<unsigned int> y;
     Property<unsigned int> width;
     Property<unsigned int> height;
+    Property<bool> isPositionInvalid;
 
     std::vector<std::shared_ptr<AbstractControl>> children;
 };

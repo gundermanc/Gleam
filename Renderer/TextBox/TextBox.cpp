@@ -1,5 +1,19 @@
 #include "TextBox.h"
 
+TextBox::TextBox(std::shared_ptr<TextDocument> textDocument, Color background, Color foreground, unsigned int x, unsigned int y, unsigned int width, unsigned int height)
+    : fontSize(12),
+    scrollLine(0),
+    scrollRate(3),
+    textDocument(textDocument),
+    AbstractControl(background, foreground, x, y, width, height)
+{
+    // Invalidate position when scroll line changes.
+    this->GetScrollLine().SubscribeToChange([this](unsigned int oldValue, unsigned int newValue)
+    {
+        this->GetIsPositionInvalid().SetValue(true);
+    });
+}
+
 void TextBox::Position(
     std::shared_ptr<AbstractGraphicsContext> graphicsContext,
     unsigned int maxWidth,
@@ -65,6 +79,6 @@ void TextBox::Scroll(int x, int y, int scrollX, int scrollY)
         updatedScrollLinePropertyValue = totalLines - 1;
     }
 
-
+    // Update scroll position and invalid
     scrollLineProperty.SetValue(updatedScrollLinePropertyValue);
 }
