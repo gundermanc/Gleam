@@ -5,6 +5,9 @@
 #include "../Framework/AbstractViewport.h"
 #include "OpenGLGraphicsContext.h"
 
+// Forward declare to avoid leakage of OpenGL and GLFW into the main app.
+struct GLFWwindow;
+
 class OpenGLViewport : public AbstractViewport
 {
 public:
@@ -16,7 +19,7 @@ public:
 
 private:
     // Store GLFWwindow* as void* to avoid leakage of OpenGL into caller.
-    void* window = nullptr;
+    GLFWwindow* window = nullptr;
 
     std::shared_ptr<AbstractGraphicsContext> abstractGraphicsContext;
 };

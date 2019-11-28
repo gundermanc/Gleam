@@ -9,14 +9,9 @@
 #include <GLFW/glfw3.h>
 using namespace ftgl;
 
-// Windows Macro obnoxiously collides with function name here..
-#ifdef DrawText
-#undef DrawText
-#endif // DrawText
-
 namespace
 {
-    // Unavoidable (I think) globals 🤮
+    // Unavoidable (I think) global 🤮
     OpenGLViewport* viewportSingleton = nullptr;
 
     void reshape(GLFWwindow* window, int width, int height)
@@ -87,7 +82,10 @@ OpenGLViewport::OpenGLViewport(std::string title, int width, unsigned int height
 
 void OpenGLViewport::BeginEventLoop()
 {
-    auto window = static_cast<GLFWwindow*>(this->window);
+    // Perform initial layout.
+    this->Reshape(
+        this->GetWidth().GetValue(),
+        this->GetHeight().GetValue());
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -98,8 +96,6 @@ void OpenGLViewport::BeginEventLoop()
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-    // TODO: delete graphics context?
 
     // Terminate GLFW
     glfwTerminate();
@@ -112,9 +108,6 @@ void OpenGLViewport::Draw()
     // Instruct graphics context to draw any pending textures:
     auto graphicsContext = std::static_pointer_cast<OpenGLGraphicsContext>(this->abstractGraphicsContext);
 
-    // Compute control positions, if needed.
-    this->Position(graphicsContext, this->GetWidth().GetValue(), this->GetHeight().GetValue());
-
     // Re-render.
     graphicsContext->BeginDrawing();
     this->Render(this->abstractGraphicsContext);
@@ -126,6 +119,9 @@ void OpenGLViewport::Reshape(unsigned int width, unsigned int height)
     this->GetWidth().SetValue(width);
     this->GetHeight().SetValue(height);
 
+    auto graphicsContext = std::static_pointer_cast<OpenGLGraphicsContext>(this->abstractGraphicsContext);
+
     // Instruct graphics context that we're changing dimensions.
-    std::static_pointer_cast<OpenGLGraphicsContext>(this->abstractGraphicsContext)->Reshape(width, height);
+    graphicsContext->Reshape(width, height);
+    this->Position(graphicsContext, width, height);
 }

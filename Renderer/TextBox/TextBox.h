@@ -10,14 +10,7 @@
 class TextBox : public AbstractControl
 {
 public:
-    TextBox(std::shared_ptr<TextDocument> textDocument, Color background, Color foreground, unsigned int x, unsigned int y, unsigned int width, unsigned int height)
-        : fontSize(12),
-        scrollLine(0),
-        scrollRate(3),
-        AbstractControl(background, foreground, x, y, width, height)
-    {
-        this->textDocument = textDocument;
-    }
+    TextBox(std::shared_ptr<TextDocument> textDocument, Color background, Color foreground, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
 
     Property<unsigned int>& GetFontSize() { return this->fontSize; }
     Property<unsigned int>& GetScrollLine() { return this->scrollLine; }
