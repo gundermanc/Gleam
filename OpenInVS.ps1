@@ -5,6 +5,7 @@
 if (-not (Get-Command "devenv.exe" -ErrorAction SilentlyContinue))
 {
     Write-Host -ForegroundColor Yellow "Must be run from within Visual Studio Developer Command"
+    Exit
 }
 
 # Bootstrap repo.
