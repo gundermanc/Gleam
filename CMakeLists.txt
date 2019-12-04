@@ -16,6 +16,17 @@ if(NOT CMAKE_BUILD_TYPE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 endif()
 
+enable_testing()
+
+add_executable(
+    TextLibraryTests
+    Test/Renderer/Text/ImmutableBTreeTests.cpp)
+target_link_libraries(TextLibraryTests PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
+
+add_test(TextLibraryTests TextLibrary)
+
+
+
 #========== Targets Configurations ============#
 
 # Build an executable (Unix-like OSes generates ./gleam, on
@@ -32,6 +43,7 @@ find_package(Freetype REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
 
 # Build RenderFramework.. abstraction for the renderer.
 add_library(
@@ -57,6 +69,7 @@ target_link_libraries(OpenGLRenderer PRIVATE Freetype::Freetype)
 # Build Text library.. library for opening and interacting with text and files.
 add_library(
     TextLibrary
+    Renderer/Text/ImmutableBTree.cpp
     Renderer/Text/TextDocument.cpp)
 
 # Build Text box library.. library for displaying files.

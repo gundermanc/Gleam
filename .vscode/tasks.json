@@ -1,0 +1,29 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build",
+            "type": "shell",
+            "group": "build",
+            "windows": {
+                "command": ".\\Build.ps1"
+            },
+            "osx": {
+                "command": "./build.sh"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Start",
+            "type": "shell",
+            "osx":{
+                "command": "./gleam",
+                "options" :{
+                    "cwd": "out/gleam.app/Contents/MacOS"
+                }
+            }
+        }
+    ]
+}
