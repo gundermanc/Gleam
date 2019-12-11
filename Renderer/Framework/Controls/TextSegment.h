@@ -2,7 +2,7 @@
 
 #include "AbstractControl.h"
 #include "../AbstractGraphicsContext.h"
-#include "../Property.h"
+#include "../../Utilities/Property.h"
 
 enum class AlignmentMode
 {

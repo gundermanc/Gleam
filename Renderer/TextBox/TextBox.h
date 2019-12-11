@@ -4,7 +4,7 @@
 #include <vector>
 #include "../Framework/Controls/AbstractControl.h"
 #include "../Framework/Controls/TextSegment.h"
-#include "../Framework/Property.h"
+#include "../Utilities/Property.h"
 #include "../Text/TextDocument.h"
 
 class TextBox : public AbstractControl

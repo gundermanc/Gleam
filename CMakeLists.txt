@@ -24,6 +24,7 @@ endif()
 add_executable(
     gleam WIN32 MACOSX_BUNDLE
     Renderer/Main.cpp)
+target_link_libraries(gleam PRIVATE Utilities)
 target_link_libraries(gleam PRIVATE RendererFramework)
 target_link_libraries(gleam PRIVATE OpenGLRenderer)
 target_link_libraries(gleam PRIVATE AppLibrary)
@@ -39,8 +40,7 @@ add_library(
     Renderer/Framework/Controls/AbstractControl.cpp
     Renderer/Framework/Controls/TextSegment.cpp
     Renderer/Framework/AbstractGraphicsContext.cpp
-    Renderer/Framework/AbstractViewport.cpp
-    Renderer/Framework/Property.cpp)
+    Renderer/Framework/AbstractViewport.cpp)
 
 # Build OpenGLFramework.. the OpenGL version of the renderer.
 add_library(
@@ -58,6 +58,11 @@ target_link_libraries(OpenGLRenderer PRIVATE Freetype::Freetype)
 add_library(
     TextLibrary
     Renderer/Text/TextDocument.cpp)
+
+# Build Util library.. library for common shared bits.
+add_library(
+    Utilities
+    Renderer/Utilities/FileLogger.cpp)
 
 # Build Text box library.. library for displaying files.
 add_library(
