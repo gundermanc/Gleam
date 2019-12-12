@@ -1,9 +1,16 @@
 #include "TextBox.h"
 
-TextBox::TextBox(std::shared_ptr<TextDocument> textDocument, Color background, Color foreground, unsigned int x, unsigned int y, unsigned int width, unsigned int height)
-    : fontSize(12),
-    scrollLine(0),
-    scrollRate(3),
+TextBox::TextBox(
+    std::shared_ptr<TextDocument> textDocument,
+    Color background,
+    Color foreground,
+    unsigned int x,
+    unsigned int y,
+    unsigned int width,
+    unsigned int height)
+    : fontSize(12, [](unsigned int newFontSize) { return newFontSize > 0; }),
+    scrollLine(0, [this](unsigned int newScrollLine) { return newScrollLine >= 0 && newScrollLine < this->textDocument->GetLines().size(); }),
+    scrollRate(3, [](unsigned int newScrollRate) { return newScrollRate > 0; }),
     textDocument(textDocument),
     AbstractControl(background, foreground, x, y, width, height)
 {
@@ -69,16 +76,6 @@ void TextBox::Scroll(int x, int y, int scrollX, int scrollY)
     int updatedScrollLinePropertyValue = scrollLinePropertyValue - (scrollY * this->GetScrollRate().GetValue());
     auto totalLines = this->textDocument->GetLines().size();
 
-    // Ensure updatedScrollLinePropertyValue is within bounds.
-    if (updatedScrollLinePropertyValue < 0)
-    {
-        updatedScrollLinePropertyValue = 0;
-    }
-    else if (updatedScrollLinePropertyValue >= totalLines)
-    {
-        updatedScrollLinePropertyValue = totalLines - 1;
-    }
-
-    // Update scroll position and invalid
+    // Update scroll position and invalidate.
     scrollLineProperty.SetValue(updatedScrollLinePropertyValue);
 }
