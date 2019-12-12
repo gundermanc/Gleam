@@ -112,7 +112,7 @@ void FileLogger::__LogAndFailFast(
     ExitCode exitCode)
 {
     // Write to the log.
-    this->Log(LogSeverity::Critical, file, line, message);
+    this->__Log(LogSeverity::Critical, file, line, message);
 
     // Lock file stream.
     this->fileStream.Access([exitCode](std::ofstream*& fileStream)
