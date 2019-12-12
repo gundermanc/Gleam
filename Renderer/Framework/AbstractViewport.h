@@ -5,7 +5,7 @@
 
 #include "Controls/AbstractControl.h"
 #include "AbstractGraphicsContext.h"
-#include "Property.h"
+#include "../Utilities/Property.h"
 
 class AbstractViewport : public AbstractControl {
 public:

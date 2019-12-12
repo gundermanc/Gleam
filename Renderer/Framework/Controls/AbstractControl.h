@@ -4,7 +4,7 @@
 #include <vector>
 #include "../AbstractGraphicsContext.h"
 #include "../Color.h"
-#include "../Property.h"
+#include "../../Utilities/Property.h"
 
 class AbstractControl
 {
