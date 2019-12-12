@@ -30,7 +30,7 @@ public:
         unsigned int y,
         unsigned int width,
         unsigned int height)
-        : fontSize(fontSize),
+        : fontSize(fontSize, [](unsigned int newFontSize) { return newFontSize > 0; }),
         text(text),
         textAlignment(AlignmentMode::Left),
         textClippingMode(TextClippingMode::Ellipsis),

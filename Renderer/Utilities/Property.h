@@ -9,9 +9,14 @@ class Property
 {
 public:
     Property() { }
-    Property(TValue initialValue)
+
+    Property(TValue initialValue) : Property(initialValue, [](TValue newValue) { return true; })
     {
-        this->value = initialValue;
+    }
+
+    Property(TValue initialValue, std::function<bool(TValue)> isValidValueFunc)
+        : value(initialValue), isValidValueFunc(isValidValueFunc)
+    {
     }
 
     void SubscribeToChange(std::function<void(TValue, TValue)> listener) { this->changeSubscribers.push_back(listener); }
@@ -19,6 +24,14 @@ public:
     TValue GetValue() const { return this->value; }
     void SetValue(TValue value)
     {
+        // Ensure value is valid. If the function returns false, don't update the value.
+        // The validator can also optionally fail fast or throw if they want to.
+        if (!this->isValidValueFunc(value))
+        {
+            return;
+        }
+
+        // Update the value.
         auto oldValue = this->GetValue();
 
         this->value = value;
@@ -31,6 +44,7 @@ public:
     }
 
 protected:
-    TValue value;
+    const std::function<bool(TValue)> isValidValueFunc;
     std::vector<std::function<void(TValue, TValue)>> changeSubscribers;
+    TValue value;
 };

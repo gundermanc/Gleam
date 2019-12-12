@@ -14,15 +14,22 @@ namespace
     // Unavoidable (I think) global 🤮
     OpenGLViewport* viewportSingleton = nullptr;
 
+    void character(GLFWwindow* window, unsigned int character)
+    {
+        viewportSingleton->SendKey(Key::None, KeyAction::TypeCharacter, character);
+    }
+
+    void key(GLFWwindow* window, int key, int scanCode, int action, int mods)
+    {
+        // We can cast the GLFW key to our framework key because
+        // they are the same, by convention.
+        viewportSingleton->SendKey((Key)key, (KeyAction)action, '/0');
+    }
+
     void reshape(GLFWwindow* window, int width, int height)
     {
         glViewport(0, 0, width, height);
         viewportSingleton->Reshape(width, height);
-    }
-
-    void key(GLFWwindow* window, int k, int s, int action, int mods)
-    {
-
     }
 
     void scroll(GLFWwindow* window, double scrollX, double scrollY)
@@ -60,6 +67,7 @@ OpenGLViewport::OpenGLViewport(std::string title, int width, unsigned int height
 
     // Set callback functions
     glfwSetFramebufferSizeCallback(window, reshape);
+    glfwSetCharCallback(window, character);
     glfwSetKeyCallback(window, key);
     glfwSetScrollCallback(window, scroll);
 
