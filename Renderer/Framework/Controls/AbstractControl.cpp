@@ -47,6 +47,21 @@ void AbstractControl::Position(
     }
 }
 
+// TODO: we need some concept of focus eventually instead of just sending to every control.
+bool AbstractControl::SendKey(Key key, KeyAction action, char character)
+{
+    // Find control that handles this key press.
+    for (auto& control : this->GetChildren())
+    {
+        if (control->SendKey(key, action, character))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void AbstractControl::Scroll(int x, int y, int scrollX, int scrollY)
 {
     // Find control under the cursor.

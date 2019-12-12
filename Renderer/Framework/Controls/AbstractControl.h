@@ -4,6 +4,7 @@
 #include <vector>
 #include "../AbstractGraphicsContext.h"
 #include "../Color.h"
+#include "../Keys.h"
 #include "../../Utilities/Property.h"
 
 class AbstractControl
@@ -31,8 +32,11 @@ public:
     Property<bool>& GetIsPositionInvalid() { return this->isPositionInvalid; }
 
     std::vector<std::shared_ptr<AbstractControl>>& GetChildren() { return this->children; }
-    virtual void Scroll(int x, int y, int scrollX, int scrollY);
 
+    // TODO: implement support for accelerators, focus, etc.
+    // TODO: implement support for multi-char characters.
+    virtual bool SendKey(Key key, KeyAction action, char character);
+    virtual void Scroll(int x, int y, int scrollX, int scrollY);
 
 protected:
     virtual void Render(std::shared_ptr<AbstractGraphicsContext> graphicsContext);
