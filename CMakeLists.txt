@@ -33,6 +33,7 @@ find_package(Freetype REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
 
 # Build RenderFramework.. abstraction for the renderer.
 add_library(
@@ -77,6 +78,17 @@ add_library(
 target_link_libraries(AppLibrary RendererFramework)
 target_link_libraries(AppLibrary TextLibrary)
 target_link_libraries(AppLibrary TextBox)
+
+# Build TextBox tests.
+enable_testing()
+
+add_executable(
+    TextBoxTests
+    Test/Renderer/TextBox/TextBoxTests.cpp)
+target_link_libraries(TextBoxTests PUBLIC GTest::gtest_main)
+target_link_libraries(TextBoxTests PUBLIC TextLibrary)
+target_link_libraries(TextBoxTests PUBLIC RendererFramework)
+target_link_libraries(TextBoxTests PUBLIC TextBox)
 
 # Freetype-GL package doesn't seem to have right configuration for install to work.
 if (MSVC)
