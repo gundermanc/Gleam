@@ -6,21 +6,23 @@ class MockViewport : public AbstractControl
 {
 public:
     MockViewport(unsigned int width, unsigned int height)
-        : AbstractControl(colors::Black, colors::White, 0, 0, width, height)
+        : AbstractControl(colors::Black, colors::White, 0, 0, width, height),
+        mockGraphicsContext(new MockGraphicsContext())
     {
     }
 
-    void Render(std::shared_ptr<AbstractGraphicsContext> graphicsContext)
+    void Render()
     {
-        AbstractControl::Render(graphicsContext);
+        AbstractControl::Render(this->mockGraphicsContext);
     }
 
-    void Position(
-        std::shared_ptr<AbstractGraphicsContext> graphicsContext)
+    void Position()
     {
         AbstractControl::Position(
-            graphicsContext,
+            this->mockGraphicsContext,
             this->GetWidth().GetValue(),
             this->GetHeight().GetValue());
     }
+private:
+    std::shared_ptr<MockGraphicsContext> mockGraphicsContext;
 };

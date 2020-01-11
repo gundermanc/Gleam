@@ -58,7 +58,11 @@ target_link_libraries(OpenGLRenderer PRIVATE Freetype::Freetype)
 # Build Text library.. library for opening and interacting with text and files.
 add_library(
     TextLibrary
-    Renderer/Text/TextDocument.cpp)
+    Renderer/Text/TextSpan.cpp
+    Renderer/Text/TextDocument.cpp
+    Renderer/Text/TextLine.cpp
+    Renderer/Text/TextMoment.cpp
+    Renderer/Text/TextUtils.cpp)
 
 # Build Util library.. library for common shared bits.
 add_library(

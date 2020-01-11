@@ -15,6 +15,7 @@ enum class Key
 {
     None = 0,
 
+    Enter = 257,     // TODO: GLFW NAME
     Backspace = 259, // GLFW_KEY_BACKSPACE 
 
     Right = 262,     // GLFW_KEY_RIGHT.

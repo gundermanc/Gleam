@@ -11,10 +11,10 @@ TextBox::TextBox(
     unsigned int width,
     unsigned int height)
     : caretColor(foreground),
-    caretPosition(0, [textDocument](unsigned int newCaretPosition) { return newCaretPosition <= textDocument->GetLength(); }),
+    caretPosition(0, [textDocument](unsigned int newCaretPosition) { return newCaretPosition <= textDocument->GetCurrentMoment()->GetLength(); }),
     caretThickness(1),
     fontSize(12, [](unsigned int newFontSize) { return newFontSize > 0; }),
-    scrollLine(0, [this](unsigned int newScrollLine) { return newScrollLine >= 0 && newScrollLine < this->textDocument->GetLines().size(); }),
+    scrollLine(0, [this](unsigned int newScrollLine) { return newScrollLine >= 0 && newScrollLine < this->textDocument->GetCurrentMoment()->GetLineCount(); }),
     scrollRate(3, [](unsigned int newScrollRate) { return newScrollRate > 0; }),
     textDocument(textDocument),
     AbstractControl(background, foreground, x, y, width, height)
@@ -45,67 +45,67 @@ void TextBox::Position(
 
     auto lineHeight = std::get<1>(dimensions);
 
-    auto lines = this->textDocument->GetLines();
-    auto initialLine = this->GetScrollLine().GetValue();
+    //auto lines = this->textDocument->GetLines();
+    //auto initialLine = this->GetScrollLine().GetValue();
 
-    int y = this->GetY().GetValue();
-    for (size_t lineNumber = initialLine; lineNumber < lines.size(); lineNumber++)
-    {
-        const std::string& line = lines[lineNumber];
+    //int y = this->GetY().GetValue();
+    //for (size_t lineNumber = initialLine; lineNumber < lines.size(); lineNumber++)
+    //{
+    //    const std::string& line = lines[lineNumber];
 
-        // Draw only the visible portion.
-        if (y >= this->GetHeight().GetValue())
-        {
-            break;
-        }
+    //    // Draw only the visible portion.
+    //    if (y >= this->GetHeight().GetValue())
+    //    {
+    //        break;
+    //    }
 
-        // TODO: position relative to parent?
-        auto textSegment = new TextSegment(
-            line,
-            fontSize,
-            colors::Transparent,
-            this->GetForeground().GetValue(),
-            this->GetX().GetValue(),
-            y,
-            this->GetWidth().GetValue(),
-            lineHeight);
+    //    // TODO: position relative to parent?
+    //    auto textSegment = new TextSegment(
+    //        line,
+    //        fontSize,
+    //        colors::Transparent,
+    //        this->GetForeground().GetValue(),
+    //        this->GetX().GetValue(),
+    //        y,
+    //        this->GetWidth().GetValue(),
+    //        lineHeight);
 
-        this->GetChildren().push_back(std::shared_ptr<AbstractControl>(textSegment));
-        y += lineHeight;
-    }
+    //    this->GetChildren().push_back(std::shared_ptr<AbstractControl>(textSegment));
+    //    y += lineHeight;
+    //}
 
-    auto caretPosition = this->GetCaretPosition().GetValue();
+    //auto caretPosition = this->GetCaretPosition().GetValue();
 
-    auto positionAndLineNumber = this->textDocument->GetPositionAndLineNumberOfLineContainingPosition(caretPosition);
-    auto position = std::get<0>(positionAndLineNumber);
-    auto lineNumber = std::get<1>(positionAndLineNumber);
+    //auto positionAndLineNumber = this->textDocument->GetPositionAndLineNumberOfLineContainingPosition(caretPosition);
+    //auto position = std::get<0>(positionAndLineNumber);
+    //auto lineNumber = std::get<1>(positionAndLineNumber);
 
     // TODO: is this possible?
-    if (lineNumber != -1)
-    {
-        // Get offset from the start of the line.
-        // TODO: cache some of this.
-        std::string line = this->textDocument->GetLines().at(lineNumber);
-        std::tuple<unsigned int, unsigned int, size_t> linePrefixDimensions = graphicsContext->ComputeTextDimensions(
-            line.substr(0, caretPosition - position),
-            this->GetFontSize().GetValue(),
-            this->GetWidth().GetValue());
+    //if (lineNumber != -1)
+    //{
+    //    // Get offset from the start of the line.
+    //    // TODO: cache some of this.
+    //    std::string line = this->textDocument->GetLines().at(lineNumber);
+    //    std::tuple<unsigned int, unsigned int, size_t> linePrefixDimensions = graphicsContext->ComputeTextDimensions(
+    //        line.substr(0, caretPosition - position),
+    //        this->GetFontSize().GetValue(),
+    //        this->GetWidth().GetValue());
 
-        auto linePrefixWidth = std::get<0>(linePrefixDimensions);
+    //    auto linePrefixWidth = std::get<0>(linePrefixDimensions);
 
-        // Draw primitive caret.
-        // TODO: incremental.
-        auto border = new Border(
-            this->GetCaretColor().GetValue(),
-            this->GetCaretColor().GetValue(),
-            0,
-            this->GetX().GetValue() + linePrefixWidth,
-            this->GetY().GetValue() + (lineHeight * lineNumber),
-            this->GetCaretThickness().GetValue(),
-            lineHeight);
+    //    // Draw primitive caret.
+    //    // TODO: incremental.
+    //    auto border = new Border(
+    //        this->GetCaretColor().GetValue(),
+    //        this->GetCaretColor().GetValue(),
+    //        0,
+    //        this->GetX().GetValue() + linePrefixWidth,
+    //        this->GetY().GetValue() + (lineHeight * lineNumber),
+    //        this->GetCaretThickness().GetValue(),
+    //        lineHeight);
 
-        this->GetChildren().push_back(std::shared_ptr<AbstractControl>(border));
-    }
+    //    this->GetChildren().push_back(std::shared_ptr<AbstractControl>(border));
+    //}
 
     AbstractControl::Position(
         graphicsContext,
@@ -138,12 +138,20 @@ bool TextBox::SendKey(Key key, KeyAction action, char character)
 
         if (caretPosition > 0)
         {
-            this->textDocument->Remove(this->GetCaretPosition().GetValue() - 1, 1);
+            this->textDocument->Remove(caretPosition - 1, 1);
             this->GetCaretPosition().SetValue(caretPosition - 1);
 
             // TODO: do as a side effect of document changing.
             this->GetIsPositionInvalid().SetValue(true);
         }
+        return true;
+    }
+    case Key::Enter:
+    {
+        auto lineEnding = this->GetTextDocument().GetPreferredLineEnding().GetValue();
+        this->textDocument->Insert(lineEnding, this->GetCaretPosition().GetValue());
+
+        this->GetCaretPosition().SetValue(this->GetCaretPosition().GetValue() + lineEnding.size());
         return true;
     }
     case Key::Left:
@@ -162,7 +170,7 @@ void TextBox::Scroll(int x, int y, int scrollX, int scrollY)
     auto& scrollLineProperty = this->GetScrollLine();
     auto scrollLinePropertyValue = scrollLineProperty.GetValue();
     int updatedScrollLinePropertyValue = scrollLinePropertyValue - (scrollY * this->GetScrollRate().GetValue());
-    auto totalLines = this->textDocument->GetLines().size();
+    auto totalLines = this->textDocument->GetCurrentMoment()->GetLineCount();
 
     // Update scroll position and invalidate.
     scrollLineProperty.SetValue(updatedScrollLinePropertyValue);

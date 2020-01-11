@@ -25,16 +25,17 @@ public:
     Property<unsigned int>& GetFontSize() { return this->fontSize; }
     Property<unsigned int>& GetScrollLine() { return this->scrollLine; }
     Property<unsigned int>& GetScrollRate() { return this->scrollRate; }
+    TextDocument& GetTextDocument() { return *this->textDocument; }
+
+    // Overrides.
+    bool SendKey(Key key, KeyAction action, char character);
+    void Scroll(int x, int y, int scrollX, int scrollY);
 
 protected:
     void Position(
         std::shared_ptr<AbstractGraphicsContext> graphicsContext,
         unsigned int maxWidth,
         unsigned int maxHeight);
-
-    // Overrides.
-    bool SendKey(Key key, KeyAction action, char character);
-    void Scroll(int x, int y, int scrollX, int scrollY);
 
 private:
     Property<Color> caretColor;
