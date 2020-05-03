@@ -1,5 +1,5 @@
 #include "OpenGLViewport/OpenGLViewport.h"
-#include "App/CommandLineHelpView.h"
+#include "App/RemoteView.h"
 #include "App/DocumentView.h"
 #include "Utilities/FileLogger.h"
 
@@ -26,7 +26,8 @@ int main(int argc, char *argv[])
     if (argc <= 1)
     {
         logger.Log(LogSeverity::Information, "Too few arguments, displaying command line help.");
-        ShowCommandLineHelpView(viewport);
+        //ShowCommandLineHelpView(viewport);
+        ShowRemoteView(logger, viewport);
     }
     else
     {

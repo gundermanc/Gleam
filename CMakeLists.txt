@@ -33,6 +33,7 @@ find_package(Freetype REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 # Build RenderFramework.. abstraction for the renderer.
 add_library(
@@ -62,6 +63,7 @@ add_library(
 # Build Util library.. library for common shared bits.
 add_library(
     Utilities
+    Renderer/Utilities/ChildProcess.cpp
     Renderer/Utilities/FileLogger.cpp)
 
 # Build Text box library.. library for displaying files.
@@ -73,10 +75,13 @@ add_library(
 add_library(
     AppLibrary
     Renderer/App/CommandLineHelpView.cpp
-    Renderer/App/DocumentView.cpp)
+    Renderer/App/DocumentView.cpp
+    Renderer/App/RemoteView.cpp)
 target_link_libraries(AppLibrary RendererFramework)
 target_link_libraries(AppLibrary TextLibrary)
 target_link_libraries(AppLibrary TextBox)
+target_link_libraries(AppLibrary nlohmann_json nlohmann_json::nlohmann_json)
+
 
 # Freetype-GL package doesn't seem to have right configuration for install to work.
 if (MSVC)

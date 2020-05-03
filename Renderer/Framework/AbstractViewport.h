@@ -1,7 +1,9 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "Controls/AbstractControl.h"
 #include "AbstractGraphicsContext.h"

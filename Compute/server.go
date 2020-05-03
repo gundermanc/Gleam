@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"io"
 	"os"
 	"strings"
@@ -18,37 +19,73 @@ type LineWriter interface {
 	WriteLine(line string) error
 }
 
+// MessageHandler is an abstraction for code that handles a message.
+type MessageHandler interface {
+	TryHandleMessage(server *Server, message message) error
+}
+
 // Server encapsulates the server application state.
 type Server struct {
-	reader LineReader
-	writer LineWriter
+	handlers     map[string]MessageHandler
+	reader       LineReader
+	writer       LineWriter
+	responseSent bool
 }
 
 // NewServer creates a new server instance, operating on the given reader/writer.
 func NewServer(reader LineReader, writer LineWriter) *Server {
 	return &Server{
-		reader: reader,
-		writer: writer,
+		handlers: make(map[string]MessageHandler),
+		reader:   reader,
+		writer:   writer,
 	}
+}
+
+// AddHandler registers a MessageHandler to handling calls from the renderer process.
+func (server *Server) AddHandler(messageName string, handler MessageHandler) error {
+	if server.handlers[messageName] != nil {
+		return errors.New("Duplicate message handler for " + messageName)
+	}
+
+	server.handlers[messageName] = handler
+
+	return nil
+}
+
+// WriteResponse replies to the server and is intended for use by message
+// handlers in response to a message that was received.
+func (server *Server) WriteResponse(message string, params interface{}, logString string) error {
+	server.responseSent = true
+	return writeMessage(server.writer, message, params, logString)
 }
 
 // StartServer begins running the server main loop, returning only
 // after the exit message is received.
 func (server *Server) StartServer() {
 	// Write initialize message.
-	writeMessage(server.writer, initializeMessageName, "Server initialized")
+	writeMessage(server.writer, initializeMessageName, nil, "Server initialized")
 
 	for {
-		message, err := readMessage(server.reader)
-		if err != nil && err != io.EOF {
-			writeMessage(server.writer, errorMessageName, err.Error())
+		server.responseSent = false
+
+		if message, err := readMessage(server.reader); err != nil && err != io.EOF {
+			writeMessage(server.writer, errorMessageName, nil, err.Error())
 		} else {
-			switch message.Name {
-			case exitMessageName:
-				writeMessage(server.writer, exitingMessageName, "Exit message received")
+
+			// Check and see if there's a registered message handler...
+			if handler := server.handlers[message.Name]; handler != nil {
+
+				// There is a handler, dispatch to it.
+				if err := handler.TryHandleMessage(server, *message); err != nil {
+					writeMessage(server.writer, errorMessageName, nil, err.Error())
+				} else if !server.responseSent {
+					writeMessage(server.writer, errorMessageName, nil, "A handler failed to reply")
+				}
+			} else if message.Name == exitMessageName {
+				writeMessage(server.writer, exitingMessageName, nil, "Exit message received")
 				return
-			default:
-				writeMessage(server.writer, errorMessageName, "Unknown message "+message.Name)
+			} else {
+				writeMessage(server.writer, errorMessageName, nil, "Unknown message "+message.Name)
 			}
 		}
 	}
@@ -111,7 +148,6 @@ func NewStdioServer() *Server {
 }
 
 func readMessage(reader LineReader) (*message, error) {
-
 	var message message
 
 	// Read in the next line, if any.
@@ -128,8 +164,8 @@ func readMessage(reader LineReader) (*message, error) {
 	return &message, nil
 }
 
-func writeMessage(writer LineWriter, message string, logString string) error {
-	message, err := createMessage(message, logString)
+func writeMessage(writer LineWriter, message string, params interface{}, logString string) error {
+	message, err := createMessage(message, params, logString)
 	if err == nil {
 		writer.WriteLine(message)
 	}
@@ -137,10 +173,22 @@ func writeMessage(writer LineWriter, message string, logString string) error {
 	return err
 }
 
-func createMessage(messageName string, logString string) (string, error) {
-	encodedMessage := &message{
+func createMessage(messageName string, params interface{}, logString string) (string, error) {
+
+	var encodedMessage interface{}
+
+	baseMessage := &message{
 		Name:      messageName,
 		LogString: logString,
+	}
+
+	if params != nil {
+		encodedMessage = &messageWithParams{
+			message: baseMessage,
+			Params:  params,
+		}
+	} else {
+		encodedMessage = baseMessage
 	}
 
 	bytes, err := json.Marshal(&encodedMessage)
@@ -161,4 +209,11 @@ type message struct {
 
 	// Human readable description for log.
 	LogString string `json:"logString"`
+}
+
+type messageWithParams struct {
+	*message
+
+	// Parameter object
+	Params interface{} `json:"params"`
 }
