@@ -44,6 +44,22 @@ namespace
         }
     }
 
+    bool TryGetFloat(
+        nlohmann::json& json,
+        const std::string& key,
+        float& value)
+    {
+        auto valueJson = json[key];
+        if (valueJson != nullptr &&
+            (valueJson.is_number_integer() || valueJson.is_number_float()))
+        {
+            value = valueJson;
+            return true;
+        }
+
+        return false;
+    }
+
     bool TryGetUint(
         nlohmann::json& json,
         const std::string& key,
@@ -89,6 +105,100 @@ namespace
         return false;
     }
 
+    bool TryGetColor(
+        nlohmann::json& json,
+        const std::string& key,
+        Color& color)
+    {
+        nlohmann::json objJson;
+        float r;
+        float g;
+        float b;
+        float a;
+        if (TryGetObjectJson(json, key, objJson) &&
+            TryGetFloat(objJson, "R", r) &&
+            TryGetFloat(objJson, "G", g) &&
+            TryGetFloat(objJson, "B", b) &&
+            TryGetFloat(objJson, "A", a))
+        {
+            color = Color(r, g, b, a);
+            return true;
+        }
+
+        return false;
+    }
+
+    // Must be kept in sync with compute process.
+    enum class RenderInstructionType
+    {
+        Text,
+        Rectangle,
+        RectangleOutline
+    };
+
+    void RenderTextInstruction(
+        AbstractLogger& logger,
+        std::shared_ptr<AbstractGraphicsContext> graphicsContext,
+        nlohmann::json& instructionParamsJson,
+        unsigned int x,
+        unsigned int y,
+        unsigned int width,
+        unsigned int height)
+    {
+        Color color = colors::Black;
+        std::string text;
+        unsigned int size = 0;
+
+        if (!TryGetColor(instructionParamsJson, "color", color) ||
+            !TryGetString(instructionParamsJson, "text", text) ||
+            !TryGetUint(instructionParamsJson, "size", size))
+        {
+            logger.LogAndFailFast("RenderTextInstruction is missing mandatory parameter.");
+        }
+
+        graphicsContext->DrawText(text, color, size, x, y);
+    }
+
+    void RenderRectangleInstruction(
+        AbstractLogger& logger,
+        std::shared_ptr<AbstractGraphicsContext> graphicsContext,
+        nlohmann::json& instructionParamsJson,
+        unsigned int x,
+        unsigned int y,
+        unsigned int width,
+        unsigned int height)
+    {
+        Color color = colors::Black;
+
+        if (!TryGetColor(instructionParamsJson, "color", color))
+        {
+            logger.LogAndFailFast("RenderRectangleInstruction is missing mandatory parameter 'color'.");
+        }
+
+        graphicsContext->DrawRect(color, x, y, width, height);
+    }
+
+    void RenderRectangleOutlineInstruction(
+        AbstractLogger& logger,
+        std::shared_ptr<AbstractGraphicsContext> graphicsContext,
+        nlohmann::json& instructionParamsJson,
+        unsigned int x,
+        unsigned int y,
+        unsigned int width,
+        unsigned int height)
+    {
+        Color color = colors::Black;
+        float thickness = 0;
+
+        if (!TryGetColor(instructionParamsJson, "color", color) ||
+            !TryGetFloat(instructionParamsJson, "thickness", thickness))
+        {
+            logger.LogAndFailFast("RenderRectangleOutlineInstruction is missing mandatory parameter.");
+        }
+
+        graphicsContext->DrawRectOutline(color, thickness, x, y, width, height);
+    }
+
     void RenderInstructions(
         AbstractLogger& logger,
         std::shared_ptr<AbstractGraphicsContext> graphicsContext,
@@ -108,24 +218,40 @@ namespace
             for (auto it = instructionsJson.begin(); it != instructionsJson.end(); ++it)
             {
                 unsigned int type = 0;
+
+                if (!TryGetUint(*it, "type", type))
+                {
+                    logger.LogAndFailFast("RenderInstruction has no type.");
+                }
+
+                // Decode mandatory parameters.
                 unsigned int x = 0;
                 unsigned int y = 0;
                 unsigned int width = 0;
                 unsigned int height = 0;
                 nlohmann::json instructionParamsJson;
-                std::string text;
-                unsigned int size = 0;
-
-                if (TryGetUint(*it, "type", type) &&
-                    TryGetUint(*it, "x", x) &&
-                    TryGetUint(*it, "y", y) &&
-                    TryGetUint(*it, "width", width) &&
-                    TryGetUint(*it, "height", height) &&
-                    TryGetObjectJson(*it, "params", instructionParamsJson) &&
-                    TryGetString(instructionParamsJson, "text", text) &&
-                    TryGetUint(instructionParamsJson, "size", size))
+                if (!TryGetUint(*it, "x", x) ||
+                    !TryGetUint(*it, "y", y) ||
+                    !TryGetUint(*it, "width", width) ||
+                    !TryGetUint(*it, "height", height) ||
+                    !TryGetObjectJson(*it, "params", instructionParamsJson))
                 {
-                    graphicsContext->DrawText(text, colors::Green, size, x, y);
+                    logger.LogAndFailFast("RenderInstruction is missing mandatory parameter.");
+                }
+
+                switch (static_cast<RenderInstructionType>(type))
+                {
+                case RenderInstructionType::Text:
+                    RenderTextInstruction(logger, graphicsContext, instructionParamsJson, x, y, width, height);
+                    break;
+                case RenderInstructionType::Rectangle:
+                    RenderRectangleInstruction(logger, graphicsContext, instructionParamsJson, x, y, width, height);
+                    break;
+                case RenderInstructionType::RectangleOutline:
+                    RenderRectangleOutlineInstruction(logger, graphicsContext, instructionParamsJson, x, y, width, height);
+                    break;
+                default:
+                    logger.LogAndFailFast("RenderInstruction provided unrecognized instruction type.");
                 }
             }
         }
@@ -231,15 +357,21 @@ void ShowRemoteView(AbstractLogger& logger, AbstractViewport& viewport)
         logger,
         colors::Black,
         colors::Green,
-        30,
-        30,
-        viewport.GetWidth().GetValue() - 60,
-        50);
+        0,
+        0,
+        viewport.GetWidth().GetValue(),
+        viewport.GetHeight().GetValue());
 
     // Add resize handler.
     viewport.GetWidth().SubscribeToChange([remoteView](unsigned int oldValue, unsigned int newValue)
     {
-        remoteView->GetWidth().SetValue(newValue - 60);
+        remoteView->GetWidth().SetValue(newValue);
+        remoteView->SendDimensions();
+    });
+    viewport.GetHeight().SubscribeToChange([remoteView](unsigned int oldValue, unsigned int newValue)
+    {
+        remoteView->GetHeight().SetValue(newValue);
+        remoteView->SendDimensions();
     });
 
     viewport.GetChildren().push_back(std::shared_ptr<AbstractControl>(remoteView));

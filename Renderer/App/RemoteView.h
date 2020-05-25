@@ -23,10 +23,9 @@ public:
     ~RemoteView();
 
     void Render(std::shared_ptr<AbstractGraphicsContext> graphicsContext);
+    void SendDimensions();
 
 private:
     AbstractLogger& logger;
     ChildProcess* serverProcess;
-
-    void SendDimensions();
 };

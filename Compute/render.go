@@ -71,18 +71,62 @@ func (renderer renderer) handleLayoutMessage(server *Server, message Message) er
 	return err
 }
 
-type drawTextInstructionParams struct {
-	Text string `json:"text"`
-	Size uint   `json:"size"`
+var black = color{
+	R: 0,
+	G: 0,
+	B: 0,
+	A: 1,
 }
 
+var green = color{
+	R: 0,
+	G: 1,
+	B: 0,
+	A: 1,
+}
+
+type color struct {
+	R float32
+	G float32
+	B float32
+	A float32
+}
+
+type drawTextInstructionParams struct {
+	Color color  `json:"color"`
+	Text  string `json:"text"`
+	Size  uint   `json:"size"`
+}
+
+type drawRectInstructionParams struct {
+	Color color `json:"color"`
+}
+
+type drawRectOutlineInstructionParams struct {
+	Color     color   `json:"color"`
+	Thickness float32 `json:"thickness"`
+}
+
+type instructionType uint
+
+const (
+	// Text indicates that the renderer should be drawing text.
+	TextInstruction instructionType = iota
+
+	// Rect indicates that the renderer should draw a filled rectangle.
+	RectInstruction instructionType = 1
+
+	// RectOutline indicates that the renderer should draw an outline of a rectangle.
+	RectOutlineInstruction instructionType = 2
+)
+
 type instruction struct {
-	Type   uint        `json:"type"`
-	X      uint        `json:"x"`
-	Y      uint        `json:"y"`
-	Width  uint        `json:"width"`
-	Height uint        `json:"height"`
-	Params interface{} `json:"params"`
+	Type   instructionType `json:"type"`
+	X      uint            `json:"x"`
+	Y      uint            `json:"y"`
+	Width  uint            `json:"width"`
+	Height uint            `json:"height"`
+	Params interface{}     `json:"params"`
 }
 
 type layout struct {
@@ -100,12 +144,35 @@ func (renderer renderer) doLayout(
 	layout := layout{}
 
 	layout.Instructions = append(layout.Instructions, instruction{
-		Type:   0,
+		Type:   RectOutlineInstruction,
+		X:      x,
+		Y:      y,
+		Width:  renderer.width,
+		Height: renderer.height,
+		Params: drawRectOutlineInstructionParams{
+			Color: color{
+				R: 0,
+				G: 0,
+				B: 1,
+				A: 0.5,
+			},
+			Thickness: 10,
+		},
+	})
+
+	layout.Instructions = append(layout.Instructions, instruction{
+		Type:   TextInstruction,
 		X:      x,
 		Y:      y,
 		Width:  width,
 		Height: height,
 		Params: drawTextInstructionParams{
+			Color: color{
+				R: 1,
+				G: 0,
+				B: 0,
+				A: 0.5,
+			},
 			Text: "My placeholder text",
 			Size: 50,
 		},

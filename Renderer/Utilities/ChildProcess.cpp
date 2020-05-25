@@ -174,7 +174,7 @@ const std::string ChildProcess::ReadStdOutLine()
     }
 
     // TODO: dynamically grow buffer.
-    char buffer[255] = { };
+    char buffer[4048] = { };
     DWORD bytesRead = 0;
     if (!ReadFile(this->stdOutRead, buffer, _countof(buffer), &bytesRead, nullptr))
     {
@@ -195,7 +195,7 @@ void ChildProcess::WriteStdInLine(const std::string& line)
     }
 
     // TODO: dynamically grow buffer.
-    char buffer[255] = { };
+    char buffer[4084] = { };
     DWORD bytesRead = 0;
     std::string outputString = line + "\n";
     if (!WriteFile(this->stdInWrite, outputString.c_str(), outputString.size(), &bytesRead, nullptr))
