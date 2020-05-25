@@ -27,4 +27,6 @@ public:
 private:
     AbstractLogger& logger;
     ChildProcess* serverProcess;
+
+    void SendDimensions();
 };
