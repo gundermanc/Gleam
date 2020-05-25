@@ -71,27 +71,6 @@ func (renderer *renderer) handleLayoutMessage(server *Server, message Message) e
 	return err
 }
 
-var black = color{
-	R: 0,
-	G: 0,
-	B: 0,
-	A: 1,
-}
-
-var green = color{
-	R: 0,
-	G: 1,
-	B: 0,
-	A: 1,
-}
-
-type color struct {
-	R float32
-	G float32
-	B float32
-	A float32
-}
-
 type drawTextInstructionParams struct {
 	Color color  `json:"color"`
 	Text  string `json:"text"`
@@ -133,6 +112,48 @@ type layout struct {
 	Instructions []instruction `json:"instructions"`
 }
 
+func textInstruction(text string, color color, size uint, x uint, y uint, width uint, height uint) instruction {
+	return instruction{
+		Type:   TextInstruction,
+		X:      x,
+		Y:      y,
+		Width:  width,
+		Height: height,
+		Params: drawTextInstructionParams{
+			Color: color,
+			Text:  text,
+			Size:  size,
+		},
+	}
+}
+
+func rectInstruction(color color, x uint, y uint, width uint, height uint) instruction {
+	return instruction{
+		Type:   RectInstruction,
+		X:      x,
+		Y:      y,
+		Width:  width,
+		Height: height,
+		Params: drawRectInstructionParams{
+			Color: color,
+		},
+	}
+}
+
+func rectOutlineInstruction(color color, thickness float32, x uint, y uint, width uint, height uint) instruction {
+	return instruction{
+		Type:   RectOutlineInstruction,
+		X:      x,
+		Y:      y,
+		Width:  width,
+		Height: height,
+		Params: drawRectOutlineInstructionParams{
+			Color:     color,
+			Thickness: thickness,
+		},
+	}
+}
+
 func (renderer *renderer) doLayout(
 	server *Server,
 	message Message,
@@ -143,39 +164,17 @@ func (renderer *renderer) doLayout(
 
 	layout := layout{}
 
-	layout.Instructions = append(layout.Instructions, instruction{
-		Type:   RectInstruction,
-		X:      x,
-		Y:      y,
-		Width:  renderer.width,
-		Height: renderer.height,
-		Params: drawRectInstructionParams{
-			Color: color{
-				R: 0,
-				G: 0,
-				B: 1,
-				A: 1,
-			},
-		},
-	})
+	layout.Instructions = append(
+		layout.Instructions,
+		rectInstruction(blue, 0, 0, renderer.width, renderer.height))
 
-	layout.Instructions = append(layout.Instructions, instruction{
-		Type:   TextInstruction,
-		X:      x,
-		Y:      y,
-		Width:  width,
-		Height: height,
-		Params: drawTextInstructionParams{
-			Color: color{
-				R: 1,
-				G: 0,
-				B: 0,
-				A: 1.0,
-			},
-			Text: "My placeholder text",
-			Size: 50,
-		},
-	})
+	layout.Instructions = append(
+		layout.Instructions,
+		rectOutlineInstruction(red, 10, 0, 0, width, height))
+
+	layout.Instructions = append(
+		layout.Instructions,
+		textInstruction("Hello world :)", green, 10, 0, 0, width, height))
 
 	server.WriteResponse(doLayoutMessageName, layout, "Requesting draw text")
 	return nil
