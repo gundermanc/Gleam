@@ -9,8 +9,8 @@ import "errors"
 // for render related messages.
 func RegisterRenderHandlers(server *Server) {
 	renderer := renderer{}
-	server.AddHandler(dimensionsMessageName, renderer)
-	server.AddHandler(layoutMessageName, renderer)
+	server.AddHandler(dimensionsMessageName, &renderer)
+	server.AddHandler(layoutMessageName, &renderer)
 }
 
 // Request message names:
@@ -27,7 +27,7 @@ type renderer struct {
 	height uint
 }
 
-func (renderer renderer) TryHandleMessage(server *Server, message Message) error {
+func (renderer *renderer) TryHandleMessage(server *Server, message Message) error {
 	switch message.Name() {
 	case dimensionsMessageName:
 		return renderer.handleDimensionsMessage(server, message)
@@ -38,7 +38,7 @@ func (renderer renderer) TryHandleMessage(server *Server, message Message) error
 	return nil
 }
 
-func (renderer renderer) handleDimensionsMessage(server *Server, message Message) error {
+func (renderer *renderer) handleDimensionsMessage(server *Server, message Message) error {
 
 	var err error
 
@@ -55,7 +55,7 @@ func (renderer renderer) handleDimensionsMessage(server *Server, message Message
 	return err
 }
 
-func (renderer renderer) handleLayoutMessage(server *Server, message Message) error {
+func (renderer *renderer) handleLayoutMessage(server *Server, message Message) error {
 	var err error
 
 	if x, err := message.UIntParam("x"); err == nil {
@@ -110,13 +110,13 @@ type drawRectOutlineInstructionParams struct {
 type instructionType uint
 
 const (
-	// Text indicates that the renderer should be drawing text.
+	// TextInstruction indicates that the renderer should be drawing text.
 	TextInstruction instructionType = iota
 
-	// Rect indicates that the renderer should draw a filled rectangle.
+	// RectInstruction indicates that the renderer should draw a filled rectangle.
 	RectInstruction instructionType = 1
 
-	// RectOutline indicates that the renderer should draw an outline of a rectangle.
+	// RectOutlineInstruction indicates that the renderer should draw an outline of a rectangle.
 	RectOutlineInstruction instructionType = 2
 )
 
@@ -133,7 +133,7 @@ type layout struct {
 	Instructions []instruction `json:"instructions"`
 }
 
-func (renderer renderer) doLayout(
+func (renderer *renderer) doLayout(
 	server *Server,
 	message Message,
 	x uint,
@@ -144,19 +144,18 @@ func (renderer renderer) doLayout(
 	layout := layout{}
 
 	layout.Instructions = append(layout.Instructions, instruction{
-		Type:   RectOutlineInstruction,
+		Type:   RectInstruction,
 		X:      x,
 		Y:      y,
 		Width:  renderer.width,
 		Height: renderer.height,
-		Params: drawRectOutlineInstructionParams{
+		Params: drawRectInstructionParams{
 			Color: color{
 				R: 0,
 				G: 0,
 				B: 1,
-				A: 0.5,
+				A: 1,
 			},
-			Thickness: 10,
 		},
 	})
 
@@ -171,7 +170,7 @@ func (renderer renderer) doLayout(
 				R: 1,
 				G: 0,
 				B: 0,
-				A: 0.5,
+				A: 1.0,
 			},
 			Text: "My placeholder text",
 			Size: 50,
