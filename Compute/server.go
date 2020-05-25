@@ -21,7 +21,7 @@ type LineWriter interface {
 
 // MessageHandler is an abstraction for code that handles a message.
 type MessageHandler interface {
-	TryHandleMessage(server *Server, message message) error
+	TryHandleMessage(server *Server, message Message) error
 }
 
 // Server encapsulates the server application state.
@@ -63,32 +63,9 @@ func (server *Server) WriteResponse(message string, params interface{}, logStrin
 // after the exit message is received.
 func (server *Server) StartServer() {
 	// Write initialize message.
-	writeMessage(server.writer, initializeMessageName, nil, "Server initialized")
+	server.WriteResponse(initializeMessageName, nil, "Server initialized")
 
-	for {
-		server.responseSent = false
-
-		if message, err := readMessage(server.reader); err != nil && err != io.EOF {
-			writeMessage(server.writer, errorMessageName, nil, err.Error())
-		} else {
-
-			// Check and see if there's a registered message handler...
-			if handler := server.handlers[message.Name]; handler != nil {
-
-				// There is a handler, dispatch to it.
-				if err := handler.TryHandleMessage(server, *message); err != nil {
-					writeMessage(server.writer, errorMessageName, nil, err.Error())
-				} else if !server.responseSent {
-					writeMessage(server.writer, errorMessageName, nil, "A handler failed to reply")
-				}
-			} else if message.Name == exitMessageName {
-				writeMessage(server.writer, exitingMessageName, nil, "Exit message received")
-				return
-			} else {
-				writeMessage(server.writer, errorMessageName, nil, "Unknown message "+message.Name)
-			}
-		}
-	}
+	server.serverLoop()
 }
 
 // StdinReader encapsulates read actions for stdio and
@@ -147,7 +124,45 @@ func NewStdioServer() *Server {
 	return NewServer(NewStdinReader(), NewStdoutWriter())
 }
 
-func readMessage(reader LineReader) (*message, error) {
+func (server *Server) serverLoop() {
+	for {
+		server.responseSent = false
+
+		var err error
+
+		if message, err := readMessage(server.reader); err == nil {
+			if handler := server.handlers[message.Name()]; handler != nil {
+				err = server.dispatchMessage(handler, message)
+			} else if message.Name() == exitMessageName {
+				server.WriteResponse(exitMessageName, nil, "Exit message received")
+				return
+			} else {
+				err = errors.New("Unknown message " + message.Name())
+			}
+		}
+
+		// Report any errors
+		if err != nil && err != io.EOF {
+			writeMessage(server.writer, errorMessageName, nil, err.Error())
+		}
+	}
+}
+
+func (server *Server) dispatchMessage(handler MessageHandler, message Message) error {
+	if err := handler.TryHandleMessage(server, message); err != nil {
+		return err
+	}
+
+	// Our handshake is 1) request 2) response. Send a generic ACK for components
+	// that choose not to explicitly respond.
+	if !server.responseSent {
+		server.WriteResponse(acknowledgeMessageName, nil, "Acknowledged")
+	}
+
+	return nil
+}
+
+func readMessage(reader LineReader) (Message, error) {
 	var message message
 
 	// Read in the next line, if any.
@@ -155,6 +170,8 @@ func readMessage(reader LineReader) (*message, error) {
 	if err != nil {
 		return nil, io.EOF
 	}
+
+	//line := "{\"name\":\"gleam/render/layout\",\"params\":{\"x\": 0, \"y\":0, \"width\":10,\"height\":11},\"logString\":\"Server initialized\"}"
 
 	// Deserialize the message.
 	if err := json.Unmarshal([]byte(line), &message); err != nil {
@@ -175,20 +192,10 @@ func writeMessage(writer LineWriter, message string, params interface{}, logStri
 
 func createMessage(messageName string, params interface{}, logString string) (string, error) {
 
-	var encodedMessage interface{}
-
-	baseMessage := &message{
-		Name:      messageName,
-		LogString: logString,
-	}
-
-	if params != nil {
-		encodedMessage = &messageWithParams{
-			message: baseMessage,
-			Params:  params,
-		}
-	} else {
-		encodedMessage = baseMessage
+	encodedMessage := &message{
+		NameString: messageName,
+		ParamsMap:  params,
+		LogString:  logString,
 	}
 
 	bytes, err := json.Marshal(&encodedMessage)
@@ -198,22 +205,67 @@ func createMessage(messageName string, params interface{}, logString string) (st
 
 // Message names.
 
-const errorMessageName = "gleam/editor/error"
-const exitMessageName = "gleam/editor/exit"
-const exitingMessageName = "gleam/editor/exiting"
-const initializeMessageName = "gleam/editor/initialize"
+const acknowledgeMessageName = "gleam/ack"
+const errorMessageName = "gleam/error"
+const exitMessageName = "gleam/exit"
+const initializeMessageName = "gleam/initialize"
+
+// Message is an interface for interacting with JSON messages.
+type Message interface {
+	Name() string
+	Log() string
+	Params() (map[string]interface{}, error)
+	IntParam(name string) (int, error)
+	UIntParam(name string) (uint, error)
+}
 
 type message struct {
 	// Name of the message.
-	Name string `json:"name"`
+	NameString string `json:"name"`
+
+	// Parameter object
+	ParamsMap interface{} `json:"params"`
 
 	// Human readable description for log.
 	LogString string `json:"logString"`
 }
 
-type messageWithParams struct {
-	*message
+func (message message) Name() string {
+	return message.NameString
+}
 
-	// Parameter object
-	Params interface{} `json:"params"`
+func (message message) Log() string {
+	return message.LogString
+}
+
+func (message message) Params() (map[string]interface{}, error) {
+	if paramsMap, ok := message.ParamsMap.(map[string]interface{}); ok {
+		return paramsMap, nil
+	}
+
+	return nil, errors.New("No parameters provided")
+}
+
+func (message message) IntParam(name string) (int, error) {
+	if paramsMap, err := message.Params(); err == nil {
+		if rawParam, ok := paramsMap[name]; ok {
+			if floatParam, ok := rawParam.(float64); ok {
+				return int(floatParam), nil
+			}
+		}
+	}
+
+	return 0, errors.New("Missing or invalid type parameter: " + name)
+}
+
+func (message message) UIntParam(name string) (uint, error) {
+	if paramsMap, err := message.Params(); err == nil {
+		if rawParam, ok := paramsMap[name]; ok {
+			if floatParam, ok := rawParam.(float64); ok {
+				return uint(floatParam), nil
+			}
+		}
+	}
+
+	return 0, errors.New("Missing or invalid type parameter: " + name)
 }
