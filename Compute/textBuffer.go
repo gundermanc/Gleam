@@ -7,7 +7,10 @@
 
 package main
 
-import "strings"
+import (
+	"errors"
+	"strings"
+)
 
 type Position struct {
 	Line  uint
@@ -15,6 +18,8 @@ type Position struct {
 }
 
 type TextBuffer interface {
+	Insert(position Position, text string) error
+	Delete(position Position, count uint) error
 	Line(lineNumber uint) string
 	Lines() uint
 	String() string
@@ -65,6 +70,49 @@ func NewTextBuffer(text string) TextBuffer {
 		length: length,
 		lines:  lines,
 	}
+}
+
+func (textBuffer *textBuffer) Insert(position Position, text string) error {
+
+	// Make sure that this position exists in the buffer.
+	if position.Line >= textBuffer.Lines() ||
+		position.Index >= uint(len(textBuffer.Line(position.Line))) {
+
+		return errors.New("Invalid position in TextBuffer")
+	}
+
+	oldLineText := textBuffer.Line(position.Line)
+	newLineText := oldLineText[0:position.Index] + text + oldLineText[position.Index:]
+
+	textBuffer.lines[position.Line] = textLine{
+		newLineText,
+		textBuffer.lines[position.Line].lineEnding,
+	}
+
+	return nil
+}
+
+func (textBuffer *textBuffer) Delete(position Position, count uint) error {
+	// Make sure that this position exists in the buffer.
+	if position.Line >= textBuffer.Lines() ||
+		position.Index >= uint(len(textBuffer.Line(position.Line))) {
+
+		return errors.New("Invalid position in TextBuffer")
+	}
+
+	if count < 0 {
+		return errors.New("Count must be positive")
+	}
+
+	oldLineText := textBuffer.Line(position.Line)
+	newLineText := oldLineText[0:position.Index] + oldLineText[position.Index+count:]
+
+	textBuffer.lines[position.Line] = textLine{
+		newLineText,
+		textBuffer.lines[position.Line].lineEnding,
+	}
+
+	return nil
 }
 
 func (textBuffer *textBuffer) Line(lineNumber uint) string {

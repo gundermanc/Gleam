@@ -31,6 +31,25 @@ func (textView *textView) Caret() Caret {
 }
 
 func (textView *textView) Key(action KeyAction, key Key, character rune) {
+	caret := textView.Caret()
+
+	if action == KeyActionTypeCharacter {
+		textView.TextBuffer().Insert(caret.Position(), string(character))
+		caret.MoveRight()
+	} else if action == KeyActionPress || action == KeyActionRepeat {
+		switch key {
+		case KeyBackspace:
+
+			// TODO: what if at beginning or end of line.
+			previousChar := Position{
+				caret.Position().Line,
+				caret.Position().Index - 1,
+			}
+			textView.TextBuffer().Delete(previousChar, 1)
+			caret.MoveLeft()
+		}
+	}
+
 	textView.Caret().Key(action, key, character)
 }
 
