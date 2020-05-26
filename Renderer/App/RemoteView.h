@@ -25,6 +25,8 @@ public:
     void Render(std::shared_ptr<AbstractGraphicsContext> graphicsContext);
     void SendDimensions();
 
+    bool SendKey(Key key, KeyAction action, char character);
+
 private:
     AbstractLogger& logger;
     ChildProcess* serverProcess;

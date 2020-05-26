@@ -9,6 +9,11 @@ package main
 
 import "strings"
 
+type Position struct {
+	Line  uint
+	Index uint
+}
+
 type TextBuffer interface {
 	Line(lineNumber uint) string
 	Lines() uint

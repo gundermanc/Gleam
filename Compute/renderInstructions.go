@@ -31,7 +31,7 @@ type instructionType uint
 
 const (
 	// TextInstruction indicates that the renderer should be drawing text.
-	TextInstruction instructionType = iota
+	TextInstruction instructionType = 0
 
 	// RectInstruction indicates that the renderer should draw a filled rectangle.
 	RectInstruction instructionType = 1

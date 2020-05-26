@@ -10,6 +10,7 @@ type Control interface {
 	Y() uint
 	Width() uint
 	Height() uint
+	Key(action KeyAction, key Key, character rune)
 	Render(renderContext RenderContext, maxWidth uint, maxHeight uint) []instruction
 }
 

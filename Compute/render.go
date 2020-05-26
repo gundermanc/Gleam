@@ -10,14 +10,16 @@ import "errors"
 func RegisterRenderHandlers(server *Server) {
 	renderer := renderer{}
 	server.AddHandler(dimensionsMessageName, &renderer)
+	server.AddHandler(keyMessageName, &renderer)
 	server.AddHandler(layoutMessageName, &renderer)
 
-	renderer.root = NewTextView(NewTextBuffer("Hello world :)\r\nThis is a demo project by Christian."))
+	renderer.root = NewTextView(NewTextBuffer("Hello world :)\nHow are you?\nBy: Christian Gunderman"))
 }
 
 // Request message names:
 
 const dimensionsMessageName = "gleam/render/dimensions"
+const keyMessageName = "gleam/input/key"
 const layoutMessageName = "gleam/render/layout"
 
 // Response message names:
@@ -71,6 +73,8 @@ func (renderer *renderer) TryHandleMessage(server *Server, message Message) erro
 	switch message.Name() {
 	case dimensionsMessageName:
 		return renderer.handleDimensionsMessage(server, message)
+	case keyMessageName:
+		return renderer.handleKeyMessage(server, message)
 	case layoutMessageName:
 		return renderer.handleLayoutMessage(server, message)
 	}
@@ -89,6 +93,25 @@ func (renderer *renderer) handleDimensionsMessage(server *Server, message Messag
 			}
 			renderer.width = width
 			renderer.height = height
+		}
+	}
+
+	return err
+}
+
+func (renderer *renderer) handleKeyMessage(server *Server, message Message) error {
+	var err error
+
+	if key, err := message.UIntParam("key"); err == nil {
+		if action, err := message.UIntParam("action"); err == nil {
+			if character, err := message.UIntParam("character"); err == nil {
+				renderer.root.Key(
+					KeyAction(action),
+					Key(key),
+					rune(character))
+
+				return nil
+			}
 		}
 	}
 

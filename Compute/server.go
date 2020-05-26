@@ -180,6 +180,8 @@ func readMessage(reader LineReader) (Message, error) {
 		return nil, io.EOF
 	}
 
+	//line := "{\"name\":\"gleam/input/key\", \"params\":{\"key\":262, \"action\":1, \"character\":0 }}"
+
 	//line := "{\"name\":\"gleam/render/layout\",\"params\":{\"x\": 0, \"y\":0, \"width\":10,\"height\":11},\"logString\":\"Server initialized\"}"
 
 	// Deserialize the message.

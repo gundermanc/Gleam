@@ -394,6 +394,31 @@ void RemoteView::SendDimensions()
     }
 }
 
+bool RemoteView::SendKey(Key key, KeyAction action, char character)
+{
+    nlohmann::json requestJson;
+    requestJson["name"] = std::string("gleam/input/key");
+    requestJson["logString"] = std::string("Sending key");
+
+    nlohmann::json paramsJson;
+    paramsJson["key"] = key;
+    paramsJson["action"] = action;
+    paramsJson["character"] = character;
+
+    requestJson["params"] = paramsJson;
+    WriteJsonRequest(this->logger, *this->serverProcess, requestJson);
+    auto response = ReadJsonResponse(this->logger, *this->serverProcess);
+
+    std::string name;
+    if (!TryGetString(response, "name", name) || name != "gleam/ack")
+    {
+        this->logger.LogAndFailFast("Failed to send keystroke to server. Unrecognized response.");
+    }
+
+    // TODO: what do if not handled?
+    return true;
+}
+
 void ShowRemoteView(AbstractLogger& logger, AbstractViewport& viewport)
 {
     // Clear all child controls from the current view.
