@@ -54,6 +54,8 @@ func (textView *textView) Key(action KeyAction, key Key, character rune) {
 }
 
 func (textView *textView) Render(renderContext RenderContext, maxWidth uint, maxHeight uint) []instruction {
+	const fontSize = 40
+
 	var instructions []instruction
 	var verticalOffset uint
 
@@ -61,20 +63,20 @@ func (textView *textView) Render(renderContext RenderContext, maxWidth uint, max
 
 		line := textView.TextBuffer().Line(i)
 
-		width, height, err := renderContext.ComputeTextDimensions(line, 20)
+		width, height, err := renderContext.ComputeTextDimensions(line, fontSize)
 
 		// TODO: report err?
 		if err == nil {
 			instructions = append(
 				instructions,
-				textInstruction(line, green, 20, 0, verticalOffset, width, height))
+				textInstruction(line, green, fontSize, 0, verticalOffset, width, height))
 
 			// Draw caret if needed.
 			caretPos := textView.Caret().Position()
 			if caretPos.Line == i {
 
 				// Determine the size of the text ahead of the caret.
-				horizOffset, _, err := renderContext.ComputeTextDimensions(line[0:caretPos.Index], 20)
+				horizOffset, _, err := renderContext.ComputeTextDimensions(line[0:caretPos.Index], fontSize)
 
 				if err == nil {
 					instructions = append(

@@ -76,7 +76,7 @@ func (textBuffer *textBuffer) Insert(position Position, text string) error {
 
 	// Make sure that this position exists in the buffer.
 	if position.Line >= textBuffer.Lines() ||
-		position.Index >= uint(len(textBuffer.Line(position.Line))) {
+		position.Index > uint(len(textBuffer.Line(position.Line))) {
 
 		return errors.New("Invalid position in TextBuffer")
 	}
