@@ -256,6 +256,46 @@ namespace
             }
         }
     }
+
+    void ProvideTextDimensions(
+        AbstractLogger& logger,
+        ChildProcess& childProcess,
+        nlohmann::json requestJson,
+        std::shared_ptr<AbstractGraphicsContext> graphicsContext)
+    {
+        // Validate request message.
+        std::string name;
+        if (!TryGetString(requestJson, "name", name) || name != "gleam/render/textDimensions")
+        {
+            logger.LogAndFailFast("ProvideTextDimensions called without proper JSON request body.");
+        }
+
+        // Decode mandatory parameters.
+        nlohmann::json instructionParamsJson;
+        unsigned int size = 0;
+        std::string text;
+        if (!TryGetObjectJson(requestJson, "params", instructionParamsJson) ||
+            !TryGetUint(instructionParamsJson, "size", size) ||
+            !TryGetString(instructionParamsJson, "text", text))
+        {
+            logger.LogAndFailFast("ProvideTextDimensions is missing mandatory parameter.");
+        }
+
+        auto dimensions = graphicsContext->ComputeTextDimensions(text, size, 999999);
+
+        // Issue response.
+        nlohmann::json responseJson;
+        responseJson["name"] = std::string("gleam/render/textDimensions");
+        responseJson["logString"] = std::string("Response to dimensions request");
+
+        nlohmann::json paramsJson;
+        paramsJson["width"] = std::get<0>(dimensions);
+        paramsJson["height"] = std::get<1>(dimensions);
+
+        responseJson["params"] = paramsJson;
+
+        WriteJsonRequest(logger, childProcess, responseJson);
+    }
 }
 
 RemoteView::RemoteView(
@@ -306,8 +346,16 @@ void RemoteView::Render(std::shared_ptr<AbstractGraphicsContext> graphicsContext
     WriteJsonRequest(this->logger, *this->serverProcess, requestJson);
     auto response = ReadJsonResponse(this->logger, *this->serverProcess);
 
-    // Validate response message.
+    // Handle any requests for additional rendering information.
     std::string name;
+    while (TryGetString(response, "name", name) &&
+        (name == "gleam/render/textDimensions"))
+    {
+        ProvideTextDimensions(this->logger, *this->serverProcess, response, graphicsContext);
+        response = ReadJsonResponse(this->logger, *this->serverProcess);
+    }
+
+    // Validate response message.
     if (!TryGetString(response, "name", name) ||
         (name != "gleam/ack" && name != "gleam/render/doLayout"))
     {

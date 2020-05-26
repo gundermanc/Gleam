@@ -59,6 +59,15 @@ func (server *Server) WriteResponse(message string, params interface{}, logStrin
 	return writeMessage(server.writer, message, params, logString)
 }
 
+// RequestClarification is a scoped callback mechanism enabling the server to request
+// more information to aid in the fulfillment of a request. As oppose to WriteResponse,
+// it does not serve as a response to the original request.
+func (server *Server) RequestClarification(message string, params interface{}, logString string) (Message, error) {
+	writeMessage(server.writer, message, params, logString)
+
+	return readMessage(server.reader)
+}
+
 // StartServer begins running the server main loop, returning only
 // after the exit message is received.
 func (server *Server) StartServer() {
