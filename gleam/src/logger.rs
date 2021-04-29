@@ -20,7 +20,7 @@ pub enum Verbosity {
     Warning = 2,
 
     /// Displays only errors.
-    Error = 3
+    Error = 3,
 }
 
 /// Logging framework for Gleam.
