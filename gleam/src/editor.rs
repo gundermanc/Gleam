@@ -8,7 +8,7 @@ use std::fs::OpenOptions;
 use std::io::Read;
 use std::io::Write;
 
-use conrod_core::{widget, Colorable, Positionable, Widget};
+use conrod_core::{widget, Colorable, Positionable, Widget, widget::drop_down_list::Idx};
 use glium::Surface;
 
 use rfd::FileDialog;
@@ -16,7 +16,7 @@ use rfd::FileDialog;
 const WIDTH: u32 = 400;
 const HEIGHT: u32 = 200;
 widget_ids! {
-    struct Ids { canvas, text_edit, scrollbar }
+    struct Ids { canvas, text_edit, scrollbar, dropdown }
 }
 
 pub fn edit_file(file_name: &str) {
@@ -26,7 +26,7 @@ pub fn edit_file(file_name: &str) {
     // Build the window.
     let event_loop = glium::glutin::event_loop::EventLoop::new();
     let window = glium::glutin::window::WindowBuilder::new()
-        .with_title("TextEdit Demo")
+        .with_title("Gleam Text Editor")
         .with_inner_size(glium::glutin::dpi::LogicalSize::new(WIDTH, HEIGHT));
     let context = glium::glutin::ContextBuilder::new()
         .with_vsync(true)
@@ -96,7 +96,7 @@ pub fn edit_file(file_name: &str) {
                             }
                         },
                         _ => {}
-                    },
+                    }
                     _ => {}
                 }
             }
@@ -137,8 +137,7 @@ fn set_ui(ref mut ui: conrod_core::UiCell, ids: &Ids, demo_text: &mut String) {
 
     for edit in widget::TextEdit::new(demo_text)
         .color(color::WHITE)
-        .padded_w_of(ids.canvas, 20.0)
-        .mid_top_of(ids.canvas)
+        .down_from(ids.dropdown, 10.0)
         .left_justify()
         .line_spacing(10.5)
         .restrict_to_height(false) // Let the height grow infinitely and scroll.
@@ -147,13 +146,17 @@ fn set_ui(ref mut ui: conrod_core::UiCell, ids: &Ids, demo_text: &mut String) {
         *demo_text = edit;
     }
 
+    widget::TitleBar::new("Gleam Text Editor", ids.text_edit)
+        .color(color::WHITE)
+        .mid_top_of(ids.canvas)
+        .set(ids.dropdown, ui);
+
     widget::Scrollbar::y_axis(ids.canvas)
         .auto_hide(true)
         .set(ids.scrollbar, ui);
 }
 
 fn read_file(file_name: &str) -> String {
-    // TODO: error handling.
     match File::open(file_name) {
         Ok (mut reader) => {
             let mut file_content = String::new();
@@ -169,6 +172,7 @@ fn save_file(file_name: &str, text: &str) {
     let mut writer = OpenOptions::new()
         .create(true)
         .write(true)
+        .truncate(true)
         .open(file_name)
         .unwrap();
 
