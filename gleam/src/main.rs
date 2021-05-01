@@ -1,5 +1,17 @@
+use rfd::FileDialog;
+
+#[macro_use]
+extern crate conrod_core;
+extern crate conrod_glium;
+#[macro_use]
+extern crate conrod_winit;
+extern crate find_folder;
+extern crate glium;
+
 mod configuration;
+mod editor;
 mod logger;
+mod support;
 
 use crate::configuration::Configuration;
 use crate::logger::Logger;
@@ -20,4 +32,6 @@ fn main() {
 
     // Read verbosity configuration.
     println!("{}", config.get_str("Verbosity", "Foobar", &mut logger));
+
+    editor::edit_file("Hello!");
 }

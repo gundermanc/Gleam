@@ -8,4 +8,13 @@ edition = "2018"
 
 [dependencies]
 chrono="0.4.19"
+rfd="0.3.0"
 toml="0.5.8"
+
+conrod_core="0.71.0"
+conrod_glium="0.71.0"
+conrod_winit="0.71.0"
+find_folder = "*"
+glium = "0.28"
+serde="1.0"
+winit = "0.23"
