@@ -4,7 +4,9 @@
 use crate::support;
 
 use std::fs::File;
+use std::fs::OpenOptions;
 use std::io::Read;
+use std::io::Write;
 
 use conrod_core::{widget, Colorable, Positionable, Widget};
 use glium::Surface;
@@ -17,7 +19,7 @@ widget_ids! {
     struct Ids { canvas, text_edit, scrollbar }
 }
 
-pub fn edit_file(text: &str) {
+pub fn edit_file(file_name: &str) {
     const WIDTH: u32 = 360;
     const HEIGHT: u32 = 720;
 
@@ -52,7 +54,9 @@ pub fn edit_file(text: &str) {
     let image_map = conrod_core::image::Map::<glium::texture::Texture2d>::new();
 
     // Some starting text to edit.
+    let text = read_file(file_name);
     let mut demo_text = text.to_owned();
+    let file_path = file_name.to_owned();
 
     let mut ctrl_down = false;
 
@@ -75,20 +79,20 @@ pub fn edit_file(text: &str) {
                         // Break from the loop upon `Escape`.
                         glium::glutin::event::WindowEvent::CloseRequested => *should_exit = true,
                         glium::glutin::event::WindowEvent::ModifiersChanged(state) => ctrl_down = state.ctrl(),
+
+                        // Save event handler.
                         glium::glutin::event::WindowEvent::KeyboardInput {
                             input:
                                 glium::glutin::event::KeyboardInput {
                                     virtual_keycode:
-                                        Some(glium::glutin::event::VirtualKeyCode::O),
+                                        Some(glium::glutin::event::VirtualKeyCode::S),
                                     ..
                                 },
                             ..
                         } => {
                             if ctrl_down {
-                                // TODO: error check.
-                                let file = FileDialog::new().pick_file().unwrap();
-                                let mut handle = File::open(file.to_str().unwrap()).unwrap();
-                                handle.read_to_string(&mut demo_text).unwrap();
+                                save_file(&file_path, &demo_text);
+                                ctrl_down = false;
                             }
                         },
                         _ => {}
@@ -137,7 +141,7 @@ fn set_ui(ref mut ui: conrod_core::UiCell, ids: &Ids, demo_text: &mut String) {
         .mid_top_of(ids.canvas)
         .left_justify()
         .line_spacing(10.5)
-        //.restrict_to_height(false) // Let the height grow infinitely and scroll.
+        .restrict_to_height(false) // Let the height grow infinitely and scroll.
         .set(ids.text_edit, ui)
     {
         *demo_text = edit;
@@ -146,4 +150,27 @@ fn set_ui(ref mut ui: conrod_core::UiCell, ids: &Ids, demo_text: &mut String) {
     widget::Scrollbar::y_axis(ids.canvas)
         .auto_hide(true)
         .set(ids.scrollbar, ui);
+}
+
+fn read_file(file_name: &str) -> String {
+    // TODO: error handling.
+    match File::open(file_name) {
+        Ok (mut reader) => {
+            let mut file_content = String::new();
+            reader.read_to_string(&mut file_content).unwrap();
+            return file_content;
+        }
+        _ => String::new()
+    }
+}
+
+fn save_file(file_name: &str, text: &str) {
+    // TODO: error handling.
+    let mut writer = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open(file_name)
+        .unwrap();
+
+    writer.write_all(text.as_bytes()).unwrap();
 }

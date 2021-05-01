@@ -1,3 +1,6 @@
+use std::env;
+use std::fs::File;
+use std::io::Read;
 use rfd::FileDialog;
 
 #[macro_use]
@@ -33,5 +36,17 @@ fn main() {
     // Read verbosity configuration.
     println!("{}", config.get_str("Verbosity", "Foobar", &mut logger));
 
-    editor::edit_file("Hello!");
+    // Ensure proper number of arguments.
+    if env::args().count() != 1 {
+        print_usage_info();
+    }
+
+    // TODO: error handling.
+    let file_name = env::args().nth(1).unwrap();
+    editor::edit_file(&file_name);
+}
+
+fn print_usage_info() {
+    println!("Usage:");
+    println!("  gleam [filename]");
 }
